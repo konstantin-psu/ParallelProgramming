@@ -1,6 +1,8 @@
-sum1.chpl
-sum2.chpl 
-sum.c
-sum-mpi.c
-sum-omp.c
-sum-pthd.c
+sum1
+sum2
+sum1_real
+sum2_real
+sum
+sum-mpi
+sum-omp
+sum-pthd
