@@ -22,6 +22,7 @@ int main(int argc, char **argv) {
   
   low = (N/size) * rank;    /* a simplistic partition scheme */ 
   high = low + (N/size);	
+  printf("Thread rank: %d. Thread range: LOW %d HIGH %d\n",rank , low, high);
   psum = 0;
   for (i = low; i < high; i++)
     psum += compute(i);

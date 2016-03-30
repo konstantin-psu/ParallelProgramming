@@ -16,14 +16,18 @@ sum1:
 sum2:
 	$(CPL) -o sum2 sum2.chpl
 
-sum-mpi:
+sum-mpi: sum-mpi.c
+	OMPI_MCA_orte_default_hostfile=~/mpihosts
 	$(MPI) -o sum-mpi sum-mpi.c
 
 sum-omp:
 	$(OMP) -o sum-omp sum-omp.c
 
-sum-pthd:
+sum-pthd: sum-pthd.c
 	$(PTH) -o sum-pthd sum-pthd.c
 
 clean:
 	rm sum sum1 sum2 sum1_real sum2_real sum-mpi sum-omp sum-pthd
+
+run-mpi: sum-mpi
+	mpirun -n 4 ./sum-mpi

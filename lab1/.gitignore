@@ -6,3 +6,4 @@ sum
 sum-mpi
 sum-omp
 sum-pthd
+*.swp
