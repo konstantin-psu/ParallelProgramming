@@ -1,0 +1,6 @@
+sum1.chpl
+sum2.chpl 
+sum.c
+sum-mpi.c
+sum-omp.c
+sum-pthd.c
