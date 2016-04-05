@@ -5,7 +5,7 @@ MPI=mpicc -g
 CPL=chpl -g
 
 
-all: condvar-pthd arraysum-pthd
+all: condvar-pthd arraysum-pthd mtxmul-pthd
 
 
 condvar-pthd: condvar-pthd.c
@@ -13,5 +13,9 @@ condvar-pthd: condvar-pthd.c
 
 arraysum-pthd: arraysum-pthd.c
 	$(PTH) -o  arraysum-pthd arraysum-pthd.c
+
+mtxmul-pthd: mtxmul-pthd.c
+	$(PTH) -o  mtxmul-pthd mtxmul-pthd.c
+
 clean:
-	rm condvar-pthd arraysum-pthd
+	rm condvar-pthd arraysum-pthd mtxmul-pthd
