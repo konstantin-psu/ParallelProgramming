@@ -27,14 +27,14 @@ int *init_array(int size) {
   int *array = (int *) malloc(sizeof(int) * size);
   for (int i = 0; i < size; i++)
     array[i] = i + 1;
-  printf("Initialized array to [1,2,...,%d]\n", size);
+  //printf("Initialized array to [1,2,...,%d]\n", size);
   return array;
 }
 
 // The worker routine
 //
 void slave(long tid) {
-  printf("Thread %ld started on %d\n", tid, sched_getcpu());
+  //printf("Thread %ld started on %d\n", tid, sched_getcpu());
   int i, psum = 0;
   do {
     pthread_mutex_lock(&sumLock);    	// read and increment idx
@@ -79,11 +79,11 @@ int main(int argc, char **argv) {
     CPU_SET(cid++ % nprocs, &cpuset);
     pthread_setaffinity_np(thread[k], sizeof(cpu_set_t), &cpuset);
   }
-  printf("%d threads created\n", numThreads);
+  //printf("%d threads created\n", numThreads);
 
   for (long k = 0; k < numThreads; k++)          // join threads 
     pthread_join(thread[k], NULL);
-  printf("%d threads joined\n", numThreads);
+  //printf("%d threads joined\n", numThreads);
 
   printf("The sum of 1 to %i is %d\n", arraySize, sum);
 }  
