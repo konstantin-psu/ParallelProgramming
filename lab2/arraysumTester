@@ -1,0 +1,14 @@
+#!/bin/bash
+
+SUMMAX=12345
+
+x=1
+t=1
+while [ $x -le $SUMMAX ]; do
+    while [ $t -le 12 ]; do
+        ./arraysum-pthd $x $t
+        t=$((t + 1))
+    done
+    t=1
+    x=$((x + 1))
+done
