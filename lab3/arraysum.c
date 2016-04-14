@@ -10,6 +10,7 @@
 
 int main(int argc, char **argv) {
   int *array, i, size, sum = 0; 
+  int *array2;
 
   // check command-line for user input
   if (argc < 2) {
@@ -23,12 +24,36 @@ int main(int argc, char **argv) {
   
   // initialize array to [1,2,..,size]
   array = (int *) malloc(sizeof(int) * size);
+  array2 = (int *) malloc(sizeof(int) * size);
+      for (i = 0; i < size; i++)
+        array[i] = i + 1;
+
+  // # pragma omp parallel num_threads(8) reduction (+:sum)
+  // # pragma for shared(array) private(i)
+  // # pragma omp for
+  int tid;
+  # pragma omp parallel for num_threads(4) private(tid)
+  for (i = 0; i < size; i++) {
+      tid = omp_get_thread_num();
+      //printf("%d tid %d || ",i, tid);
+      printf("tid %d || ", tid);
+      sum = sum + array[i];
+  }
+  printf("\n");
+  printf("  PARALLEL: The sum of the array [1,2,..,%d] is %d\n", size, sum);
+
+  sum = 0;
   for (i = 0; i < size; i++)
-    array[i] = i + 1;
+    array2[i] = i + 1;
 
   for (i = 0; i < size; i++) {
-    sum += array[i];
+    sum += array2[i];
   }
-  printf("The sum of the array [1,2,..,%d] is %d\n", size, sum);
-}  
+
+  printf("SEQUENTIAL: The sum of the array [1,2,..,%d] is %d\n", size, sum);
+
+  free(array);
+  free(array2);
+  return;
+}
 
