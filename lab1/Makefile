@@ -26,7 +26,7 @@ sum-pthd: sum-pthd.c
 	$(PTH) -o sum-pthd sum-pthd.c
 
 clean:
-	rm sum sum1 sum2 sum1_real sum2_real sum-mpi sum-omp sum-pthd
+	rm sum sum1 sum2 sum-mpi sum-omp sum-pthd
 
 run-mpi: sum-mpi
 	mpirun -n 4 ./sum-mpi
