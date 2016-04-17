@@ -1,8 +1,5 @@
 CC=gcc
 PTH=$(CC) -pthread -g -std=c99
-OMP=$(CC) -fopenmp -g
-MPI=mpicc -g
-CPL=chpl -g
 
 
 all: condvar-pthd arraysum-pthd mtxmul-pthd mtxmul-pthd2

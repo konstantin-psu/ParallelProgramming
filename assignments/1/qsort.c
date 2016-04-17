@@ -1,30 +1,30 @@
 //------------------------------------------------------------------------- 
 // This is supporting software for CS415/515 Parallel Programming.
 // Copyright (c) Portland State University.
-//------------------------------------------------------------------------- 
+//-------------------------------------------------------------------------
 
 // A sequential quicksort program.
-//
-// Usage: ./qsort <N>
+// Usage: ./qsort <N> [<nThreads>]
 // 
 //
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <sched.h>		// for getting cpu id
 #include "task-queue.h"
 #include <pthread.h>
+#include <unistd.h>
 
-pthread_mutex_t pLock;
-pthread_mutex_t bLock;
+pthread_mutex_t tLock;
+pthread_mutex_t iLock;
+task_t * initialTask;
 #define MINSIZE   10        // threshold for switching to bubblesort
 
-int thread_count = 0;
+int recursionLevel = 0, numThreads = 1;
+int * array;
 
-struct args {
-    int low;
-    int high;
-    int *array;
-};
+queue_t * sharedQueue;
 
 
 // Swap two array elements 
@@ -46,8 +46,7 @@ int *init_array(int N) {
     for (int i = 0; i < N; i++) {
         array[i] = i + 1;
     }
-    //srand(time(NULL));
-    srand(1);
+    srand(time(NULL));
     for (int i = 0; i < N; i++) {
         int j = (rand() * 1. / RAND_MAX) * (N - 1);
         swap(array, i, j);
@@ -96,64 +95,73 @@ int partition(int *array, int low, int high) {
 }
 
 // QuickSort an array range
-// 
-void quicksort(void *qargs) {
-    printf("Initializing quicksort\n");
-    struct args *thisArgs = (struct args *) qargs;
-    int low = thisArgs->low;
-    int high = thisArgs->high;
-
-    pthread_mutex_lock(&bLock);
-    int *array = thisArgs->array;
-    pthread_mutex_unlock(&bLock);
-
-    printf("Created arguments quicksort\n");
+//
+void quicksort(int *array, int low, int high) {
     if (high - low < MINSIZE) {
-        printf("Bubble sorting %d %d\n", low, high);
+        pthread_mutex_lock(&iLock);
+        recursionLevel--;
+        pthread_mutex_unlock(&iLock);
         bubblesort(array, low, high);
         return;
     }
-    printf("Partitioning quicksort\n");
-    thread_count++;
     int middle = partition(array, low, high);
-    printf("enter low %d, middle %d, high %d\n", low, middle, high);
-    printf("threads created so far %d\n", thread_count);
-    printf("Partitioning done quicksort\n");
-    pthread_t l;
-    pthread_t h;
-    struct args rArgs;
-    struct args lArgs;
     if (low < middle) {
-        pthread_mutex_lock(&bLock);
-        lArgs.array = array;
-        pthread_mutex_unlock(&bLock);
-        lArgs.low = low;
-        lArgs.high = middle - 1;
-        printf("left low %d, high %d\n", lArgs.low, lArgs.high);
-        //quicksort(&lArgs);
-        if (pthread_create(&l, NULL, (void *) quicksort, &lArgs))
-            printf("ERROR *************************************************************");
+        task_t * task = create_task(low, middle - 1);
+        pthread_mutex_lock(&tLock);
+        add_task(sharedQueue, task);
+        pthread_mutex_unlock(&tLock);
     }
     if (middle < high) {
-        pthread_mutex_lock(&bLock);
-        rArgs.array = array;
-        pthread_mutex_unlock(&bLock);
-        rArgs.low = middle + 1;
-        rArgs.high = high;
-        printf("right low %d, high %d\n", rArgs.low, rArgs.high);
-        //quicksort(&rArgs);
-        if (pthread_create(&l, NULL, (void *) quicksort, &rArgs))
-            printf("ERROR *************************************************************");
+        pthread_mutex_lock(&iLock);
+        recursionLevel++;
+        pthread_mutex_unlock(&iLock);
+        quicksort(array, middle + 1, high);
     }
-    pthread_join(l, NULL);
-    pthread_join(h, NULL);
+    pthread_mutex_lock(&iLock);
+    recursionLevel--;
+    pthread_mutex_unlock(&iLock);
+}
 
+
+void worker(long wid) {
+    printf("Worker wid %ld started on %d\n",wid, sched_getcpu());
+    int sorts = 0;
+    task_t* task = NULL;
+    int localRecurs = recursionLevel;
+    if (wid == numThreads - 1) {
+        sorts ++;
+        quicksort(array,initialTask->low,initialTask->high);
+        free(initialTask);
+        task = NULL;
+    }
+
+    while (task || localRecurs)
+    {
+        pthread_mutex_lock(&tLock);
+        localRecurs = recursionLevel;
+        task = remove_task(sharedQueue);
+        pthread_mutex_unlock(&tLock);
+        if (task) {
+            pthread_mutex_lock(&iLock);
+            recursionLevel++;
+            pthread_mutex_unlock(&iLock);
+            sorts++;
+            quicksort(array, task->low, task->high);
+            free(task);
+        }
+    }
+    printf("Worker wid %ld participated in %d sorts.\n", wid, sorts);
 }
 
 // Main routine for testing quicksort
-// 
+//
 int main(int argc, char **argv) {
-    int *array, N, NUM_THREADS = 0;
+    int N;
+
+    int * test = (int *)malloc(sizeof(int));
+    if (test) {printf("test allocated\n");}
+    free(test);
+    if (test) {printf("test deleted but not reset\n");}
 
     // check command line first
     if (argc < 2) {
@@ -168,30 +176,41 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (argc >= 2) {
-        if ((NUM_THREADS = atoi(argv[2])) < 2) {
-            printf("<N> must be greater than 2\n");
+    if (argc > 2) {
+        if ((numThreads = atoi(argv[2])) < 1) {
+            printf("<N> must be greater than 0\n");
             exit(0);
         }
     }
 
-//    array = init_array(N);
-//    struct args sort_args;
-//    pthread_t tid;
-//    sort_args.low = 0;
-//    sort_args.high = N - 1;
-//    sort_args.array = array;
-//    //  printf("Sorting started ...\n");
-//    pthread_create(&tid, NULL, (void *) quicksort, (void *) (&sort_args));
-//    // quicksort(array, 0, N-1);
-//    pthread_join(tid, NULL);
-//    //  printf("... completed.\n");
-//    int i;
-//    for (i = 0; i < N; i++) {
-//        printf("%d ", *(array + i));
-//    }
-//    printf("\n");
-//
+    pthread_t thread[numThreads];
+    array = init_array(N);
+    sharedQueue = init_queue(0);
+    initialTask = create_task(0, N-1);
+    recursionLevel = 1;
+
+    pthread_mutex_init(&tLock, NULL);   /* initialize mutex */
+    pthread_mutex_init(&iLock, NULL);   /* initialize mutex */
+
+    for (long k = 0; k < numThreads-1; k++) {
+        pthread_create(&thread[k], NULL, (void *) worker, (void *) k);
+    }
+
+    // the main thread also runs a copy of the worker() routine;
+    // its copy has the last id, numThreads-1
+
+    sleep(1); // wait for all threads to initialize
+
+    worker(numThreads-1);
+    printf("Joining threads\n");
+    // the main thread waits for worker threads to join back
+    for (long k = 0; k < numThreads-1; k++)
+        pthread_join(thread[k], NULL);
+
+    pthread_mutex_destroy(&tLock);
+    pthread_mutex_destroy(&iLock);
+
     verify_array(array, N);
+
 }
 
