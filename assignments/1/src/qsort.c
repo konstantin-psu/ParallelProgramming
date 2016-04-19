@@ -4,7 +4,7 @@
 //-------------------------------------------------------------------------
 
 // A sequential quicksort program.
-// Usage: ./qsort <N> [<nThreads>]
+// Usage: ./qsort-pthd <N> [<nThreads>]
 // 
 //
 #define _GNU_SOURCE
@@ -16,19 +16,23 @@
 #include <pthread.h>
 #include <unistd.h>
 
-pthread_mutex_t tLock;
-pthread_mutex_t iLock;
-task_t * initialTask;
-#define MINSIZE   10        // threshold for switching to bubblesort
 
-int recursionLevel = 0, numThreads = 1;
-int * array;
+/**
+ * Global variables
+ */
+#define MINSIZE   10                      // threshold for switching to bubblesort
+pthread_mutex_t taskLock;                 // Used to lock queue during add/remove task
+pthread_mutex_t clientLock;               // Protect numberOfProducers during update
+task_t * initialTask;                     // The First task that created by the master thread
+int numberOfProducers = 0, numThreads = 1;  // numberOfProducers = number of quicksorts (terminating conditions)
+                                          // numThreads by default 1
+int * array;                              // array to be sorted
+queue_t * sharedQueue;                    // Task queue
 
-queue_t * sharedQueue;
 
-
-// Swap two array elements 
-//
+/**
+ * Swap two array elements
+ */
 void swap(int *array, int i, int j) {
     if (i == j) return;
     int tmp = array[i];
@@ -36,11 +40,13 @@ void swap(int *array, int i, int j) {
     array[j] = tmp;
 }
 
-
-// Initialize array.
-// - first generate [1,2,...,N]
-// - then perform a random permutation
-//
+/**
+ *
+ * Initialize array.
+ * - first generate [1,2,...,N]
+ * - then perform a random permutation
+ *
+ */
 int *init_array(int N) {
     int *array = (int *) malloc(sizeof(int) * N);
     for (int i = 0; i < N; i++) {
@@ -55,8 +61,10 @@ int *init_array(int N) {
     return array;
 }
 
-// Verify that array is sorted
-//
+
+/**
+ * Verify that array is sorted
+ */
 void verify_array(int *array, int N) {
     for (int i = 0; i < N - 1; i++)
         if (array[i] > array[i + 1]) {
@@ -78,10 +86,13 @@ void bubblesort(int *array, int low, int high) {
                 swap(array, i, j);
 }
 
-// Pick an arbitrary element as pivot. Rearrange array 
-// elements into [smaller one, pivot, larger ones].
-// Return pivot's index.
-//
+/**
+ *
+ * Pick an arbitrary element as pivot. Rearrange array
+ * elements into [smaller one, pivot, larger ones].
+ * Return pivot's index.
+ *
+ */
 int partition(int *array, int low, int high) {
     int pivot = array[high];    // use highest element as pivot
     int middle = low;
@@ -94,60 +105,88 @@ int partition(int *array, int low, int high) {
     return middle;
 }
 
-// QuickSort an array range
-//
+/**
+ * QuickSort an array range
+ */
 void quicksort(int *array, int low, int high) {
+    /**
+     * BubbleSort performs better on smaller arrays
+     */
     if (high - low < MINSIZE) {
-        pthread_mutex_lock(&iLock);
-        recursionLevel--;
-        pthread_mutex_unlock(&iLock);
+        pthread_mutex_lock(&clientLock);
+        numberOfProducers--;                    // Exiting - decrease qSort count
+        pthread_mutex_unlock(&clientLock);
         bubblesort(array, low, high);
         return;
     }
     int middle = partition(array, low, high);
     if (low < middle) {
         task_t * task = create_task(low, middle - 1);
-        pthread_mutex_lock(&tLock);
+
+        /**
+         * Protect addition/removal to/from queue
+         */
+        pthread_mutex_lock(&taskLock);
         add_task(sharedQueue, task);
-        pthread_mutex_unlock(&tLock);
+        pthread_mutex_unlock(&taskLock);
     }
     if (middle < high) {
-        pthread_mutex_lock(&iLock);
-        recursionLevel++;
-        pthread_mutex_unlock(&iLock);
+        pthread_mutex_lock(&clientLock);
+        numberOfProducers++;                   // Increase every time quicksort is called
+        pthread_mutex_unlock(&clientLock);
         quicksort(array, middle + 1, high);
     }
-    pthread_mutex_lock(&iLock);
-    recursionLevel--;
-    pthread_mutex_unlock(&iLock);
+
+    /**
+     * Protect addition/removal to/from queue
+     */
+    pthread_mutex_lock(&clientLock);
+    numberOfProducers--;                    // Exiting - decrease qSort count
+    pthread_mutex_unlock(&clientLock);
 }
 
 
-void worker(long wid) {
+void consumer(long wid) {
     printf("Worker wid %ld started on %d\n",wid, sched_getcpu());
-    int sorts = 0;
+    int sorts = 0;                       // count number of quicksort calls in this consumer
     task_t* task = NULL;
-    int localRecurs = recursionLevel;
+    int numberOfProducersLocal = numberOfProducers;
+
+    /**
+     * Check if called by the parent thread - if so call qucksort to start filling the queue
+     */
     if (wid == numThreads - 1) {
         sorts ++;
         quicksort(array,initialTask->low,initialTask->high);
-        free(initialTask);
-        task = NULL;
+        free(initialTask);  // No longer need the initial Task
     }
 
-    while (task || localRecurs)
+    /**
+     * Loop while the queue is not empty or quicksort(in this case producer is still running)
+     */
+    while (task || numberOfProducersLocal)
     {
-        pthread_mutex_lock(&tLock);
-        localRecurs = recursionLevel;
+        /**
+         * Save number of producers to check in while loop
+         */
+        pthread_mutex_lock(&taskLock);
+        numberOfProducersLocal = numberOfProducers;
+
+        /**
+         * Try to get a task
+         */
         task = remove_task(sharedQueue);
-        pthread_mutex_unlock(&tLock);
+        pthread_mutex_unlock(&taskLock);
+
+        //  sort it
         if (task) {
-            pthread_mutex_lock(&iLock);
-            recursionLevel++;
-            pthread_mutex_unlock(&iLock);
+            pthread_mutex_lock(&clientLock);
+            numberOfProducers++;
+            pthread_mutex_unlock(&clientLock);
             sorts++;
             quicksort(array, task->low, task->high);
-            free(task);
+            free(task); // No longer need the task, this is safe to do since free doesn't reset
+                        // the pointer, so this is still a valid check for termination
         }
     }
     printf("Worker wid %ld participated in %d sorts.\n", wid, sorts);
@@ -169,6 +208,7 @@ int main(int argc, char **argv) {
         exit(0);
     }
 
+    // at least 1 argument
     if (argc >= 2) {
         if ((N = atoi(argv[1])) < 2) {
             printf("<N> must be greater than 2\n");
@@ -176,6 +216,7 @@ int main(int argc, char **argv) {
         }
     }
 
+    // more than one argument, save second and ignore the rest
     if (argc > 2) {
         if ((numThreads = atoi(argv[2])) < 1) {
             printf("<N> must be greater than 0\n");
@@ -183,34 +224,37 @@ int main(int argc, char **argv) {
         }
     }
 
+    // Initialization section
     pthread_t thread[numThreads];
     array = init_array(N);
     sharedQueue = init_queue(0);
     initialTask = create_task(0, N-1);
-    recursionLevel = 1;
 
-    pthread_mutex_init(&tLock, NULL);   /* initialize mutex */
-    pthread_mutex_init(&iLock, NULL);   /* initialize mutex */
+    // numberOfProducers is a termination conditions, so set it to 1, so other threads
+    // don't quit prematurely
+    numberOfProducers = 1;
+
+    pthread_mutex_init(&taskLock, NULL);   /* initialize mutex */
+    pthread_mutex_init(&clientLock, NULL);   /* initialize mutex */
 
     for (long k = 0; k < numThreads-1; k++) {
-        pthread_create(&thread[k], NULL, (void *) worker, (void *) k);
+        pthread_create(&thread[k], NULL, (void *) consumer, (void *) k);
     }
 
-    // the main thread also runs a copy of the worker() routine;
+    // the main thread also runs a copy of the consumer() routine;
     // its copy has the last id, numThreads-1
 
     sleep(1); // wait for all threads to initialize
 
-    worker(numThreads-1);
+    consumer(numThreads - 1);
     printf("Joining threads\n");
-    // the main thread waits for worker threads to join back
+    // the main thread waits for consumer threads to join back
     for (long k = 0; k < numThreads-1; k++)
         pthread_join(thread[k], NULL);
 
-    pthread_mutex_destroy(&tLock);
-    pthread_mutex_destroy(&iLock);
+    pthread_mutex_destroy(&taskLock);
+    pthread_mutex_destroy(&clientLock);
 
     verify_array(array, N);
-
 }
 
