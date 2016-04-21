@@ -1,2 +1,5 @@
 .idea
+*.swp
+*.log
+*.aux
 build

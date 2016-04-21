@@ -24,8 +24,8 @@
 pthread_mutex_t taskLock;                 // Used to lock queue during add/remove task
 pthread_mutex_t clientLock;               // Protect numberOfProducers during update
 task_t * initialTask;                     // The First task that created by the master thread
-int numberOfProducers = 0, numThreads = 1;  // numberOfProducers = number of quicksorts (terminating conditions)
-                                          // numThreads by default 1
+int numberOfProducers = 0, numConsumers = 1;  // numberOfProducers = number of quicksorts (terminating conditions)
+                                          // numConsumers by default 1
 int * array;                              // array to be sorted
 queue_t * sharedQueue;                    // Task queue
 
@@ -155,7 +155,7 @@ void consumer(long wid) {
     /**
      * Check if called by the parent thread - if so call qucksort to start filling the queue
      */
-    if (wid == numThreads - 1) {
+    if (wid == numConsumers - 1) {
         sorts ++;
         quicksort(array,initialTask->low,initialTask->high);
         free(initialTask);  // No longer need the initial Task
@@ -197,14 +197,9 @@ void consumer(long wid) {
 int main(int argc, char **argv) {
     int N;
 
-    int * test = (int *)malloc(sizeof(int));
-    if (test) {printf("test allocated\n");}
-    free(test);
-    if (test) {printf("test deleted but not reset\n");}
-
     // check command line first
     if (argc < 2) {
-        printf("Usage: ./qsort <N> [<numThreads>]\n");
+        printf("Usage: ./qsort <N> [<numConsumers>]\n");
         exit(0);
     }
 
@@ -218,14 +213,14 @@ int main(int argc, char **argv) {
 
     // more than one argument, save second and ignore the rest
     if (argc > 2) {
-        if ((numThreads = atoi(argv[2])) < 1) {
+        if ((numConsumers = atoi(argv[2])) < 1) {
             printf("<N> must be greater than 0\n");
             exit(0);
         }
     }
 
     // Initialization section
-    pthread_t thread[numThreads];
+    pthread_t thread[numConsumers];
     array = init_array(N);
     sharedQueue = init_queue(0);
     initialTask = create_task(0, N-1);
@@ -237,24 +232,23 @@ int main(int argc, char **argv) {
     pthread_mutex_init(&taskLock, NULL);   /* initialize mutex */
     pthread_mutex_init(&clientLock, NULL);   /* initialize mutex */
 
-    for (long k = 0; k < numThreads-1; k++) {
+    for (long k = 0; k < numConsumers -1; k++) {
         pthread_create(&thread[k], NULL, (void *) consumer, (void *) k);
     }
 
     // the main thread also runs a copy of the consumer() routine;
-    // its copy has the last id, numThreads-1
-
-    sleep(1); // wait for all threads to initialize
-
-    consumer(numThreads - 1);
+    // its copy has the last id, numConsumers-1
+    consumer(numConsumers - 1);
     printf("Joining threads\n");
     // the main thread waits for consumer threads to join back
-    for (long k = 0; k < numThreads-1; k++)
+    for (long k = 0; k < numConsumers -1; k++)
         pthread_join(thread[k], NULL);
 
     pthread_mutex_destroy(&taskLock);
     pthread_mutex_destroy(&clientLock);
 
     verify_array(array, N);
+    free(array);
+    free(sharedQueue);
 }
 
