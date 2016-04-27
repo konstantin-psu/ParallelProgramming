@@ -7,6 +7,10 @@ CPL=chpl -g
 
 all: sum sum1 sum2 sum-mpi sum-omp sum-pthd
 
+PHONY: pt
+pt: pt.c
+	$(PTH) -o pt pt.c
+
 sum:
 	$(CC) -o sum sum.c
 
