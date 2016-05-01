@@ -1,0 +1,28 @@
+time ./qsort 10000000 
+Initialized array to a random permutation of [1..10000000]
+Result verified!
+
+real	0m4.032s
+user	0m4.002s
+sys	0m0.016s
+time ./qsort 100000000 
+Initialized array to a random permutation of [1..100000000]
+Result verified!
+
+real	0m44.435s
+user	0m44.132s
+sys	0m0.248s
+time ./qsort 1000000000 
+Initialized array to a random permutation of [1..1000000000]
+Result verified!
+
+real	8m43.988s
+user	8m38.425s
+sys	0m4.634s
+time ./qsort 10000000000 
+Initialized array to a random permutation of [1..1410065408]
+Result verified!
+
+real	12m47.136s
+user	12m42.464s
+sys	0m3.360s

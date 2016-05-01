@@ -1,14 +1,15 @@
 #!/bin/bash
 
-COMMANDS="qsort qsort-omp prime prime-omp qsort-pthd"
+#COMMANDS="qsort-omp prime-omp qsort-pthd"
 SIZE=1000000
+COM=$1
+R="./$COM"
+res=$COM"Results"
 
 for y in 1 2 3 4; do
     SIZE=$(($SIZE*10))
     for x in 1 2 4 8 16 32 64 128; do
-        for t in $COMMANDS; do
-            echo "time ./$t $SIZE $x"
-            time ./$t $SIZE $x
-        done
+        echo "time ./$COM $SIZE $x"
+        time $R $SIZE $x
     done
 done

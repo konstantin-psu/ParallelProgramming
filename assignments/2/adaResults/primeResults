@@ -1,0 +1,28 @@
+time ./prime 10000000 
+Finding primes in range 1..10000000
+Total 664579 primes found
+
+real	0m1.035s
+user	0m1.009s
+sys	0m0.024s
+time ./prime 100000000 
+Finding primes in range 1..100000000
+Total 5761455 primes found
+
+real	0m13.234s
+user	0m12.708s
+sys	0m0.501s
+time ./prime 1000000000 
+Finding primes in range 1..1000000000
+Total 50847534 primes found
+
+real	2m29.599s
+user	2m25.414s
+sys	0m3.932s
+time ./prime 10000000000 
+Finding primes in range 1..1410065408
+Total 70462980 primes found
+
+real	3m32.913s
+user	3m29.010s
+sys	0m3.336s

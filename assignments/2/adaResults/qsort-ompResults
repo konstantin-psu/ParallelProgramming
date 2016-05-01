@@ -1,0 +1,113 @@
+time ./qsort-omp 10000000 1
+Initialized array to a random permutation of [1..10000000]
+Result verified!
+
+real	0m4.269s
+user	0m4.234s
+sys	0m0.028s
+time ./qsort-omp 10000000 2
+Initialized array to a random permutation of [1..10000000]
+Result verified!
+
+real	0m2.534s
+user	0m4.100s
+sys	0m0.012s
+time ./qsort-omp 10000000 4
+Initialized array to a random permutation of [1..10000000]
+Result verified!
+
+real	0m1.864s
+user	0m4.244s
+sys	0m0.028s
+time ./qsort-omp 10000000 8
+Initialized array to a random permutation of [1..10000000]
+Result verified!
+
+real	0m1.416s
+user	0m4.393s
+sys	0m0.020s
+time ./qsort-omp 10000000 16
+Initialized array to a random permutation of [1..10000000]
+Result verified!
+
+real	0m1.467s
+user	0m7.994s
+sys	0m0.040s
+time ./qsort-omp 10000000 32
+Initialized array to a random permutation of [1..10000000]
+Result verified!
+
+real	0m1.613s
+user	0m6.759s
+sys	0m8.810s
+time ./qsort-omp 10000000 64
+Initialized array to a random permutation of [1..10000000]
+Result verified!
+
+real	0m1.860s
+user	0m7.710s
+sys	0m17.881s
+time ./qsort-omp 10000000 128
+Initialized array to a random permutation of [1..10000000]
+Result verified!
+
+real	0m2.194s
+user	0m9.603s
+sys	0m23.133s
+time ./qsort-omp 100000000 1
+Initialized array to a random permutation of [1..100000000]
+Result verified!
+
+real	0m43.357s
+user	0m43.145s
+sys	0m0.140s
+time ./qsort-omp 100000000 2
+Initialized array to a random permutation of [1..100000000]
+Result verified!
+
+real	0m29.926s
+user	0m48.057s
+sys	0m0.120s
+time ./qsort-omp 100000000 4
+Initialized array to a random permutation of [1..100000000]
+Result verified!
+
+real	0m20.862s
+user	0m45.582s
+sys	0m0.120s
+time ./qsort-omp 100000000 8
+Initialized array to a random permutation of [1..100000000]
+Result verified!
+
+real	0m16.657s
+user	0m45.020s
+sys	0m0.140s
+time ./qsort-omp 100000000 16
+Initialized array to a random permutation of [1..100000000]
+Result verified!
+
+real	0m15.320s
+user	1m3.585s
+sys	0m0.288s
+time ./qsort-omp 100000000 32
+Initialized array to a random permutation of [1..100000000]
+Result verified!
+
+real	0m16.401s
+user	1m10.313s
+sys	0m55.299s
+time ./qsort-omp 100000000 64
+Initialized array to a random permutation of [1..100000000]
+Result verified!
+
+real	0m18.919s
+user	1m20.775s
+sys	1m34.418s
+time ./qsort-omp 100000000 128
+Initialized array to a random permutation of [1..100000000]
+Result verified!
+
+real	0m20.731s
+user	1m34.050s
+sys	2m36.431s
+time ./qsort-omp 1000000000 1
