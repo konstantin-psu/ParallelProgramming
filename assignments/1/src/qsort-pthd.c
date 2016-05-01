@@ -147,7 +147,7 @@ void quicksort(int *array, int low, int high) {
 
 
 void consumer(long wid) {
-    printf("Worker wid %ld started on %d\n",wid, sched_getcpu());
+    //printf("Worker wid %ld started on %d\n",wid, sched_getcpu());
     int sorts = 0;                       // count number of quicksort calls in this consumer
     task_t* task = NULL;
     int numberOfProducersLocal = numberOfProducers;
@@ -189,7 +189,7 @@ void consumer(long wid) {
                         // the pointer, so this is still a valid check for termination
         }
     }
-    printf("Worker wid %ld participated in %d sorts.\n", wid, sorts);
+    //printf("Worker wid %ld participated in %d sorts.\n", wid, sorts);
 }
 
 // Main routine for testing quicksort
@@ -239,7 +239,7 @@ int main(int argc, char **argv) {
     // the main thread also runs a copy of the consumer() routine;
     // its copy has the last id, numConsumers-1
     consumer(numConsumers - 1);
-    printf("Joining threads\n");
+    //printf("Joining threads\n");
     // the main thread waits for consumer threads to join back
     for (long k = 0; k < numConsumers -1; k++)
         pthread_join(thread[k], NULL);
