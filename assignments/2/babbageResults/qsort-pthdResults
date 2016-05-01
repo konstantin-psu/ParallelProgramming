@@ -1,224 +1,224 @@
-time ./qsort-omp 10000000 1
+time ./qsort-pthd 10000000 1
 Initialized array to a random permutation of [1..10000000]
 Result verified!
 
-real	0m4.269s
-user	0m4.234s
-sys	0m0.028s
-time ./qsort-omp 10000000 2
+real	0m3.825s
+user	0m3.798s
+sys	0m0.016s
+time ./qsort-pthd 10000000 2
 Initialized array to a random permutation of [1..10000000]
 Result verified!
 
-real	0m2.534s
-user	0m4.100s
-sys	0m0.012s
-time ./qsort-omp 10000000 4
+real	0m2.820s
+user	0m4.569s
+sys	0m0.367s
+time ./qsort-pthd 10000000 4
 Initialized array to a random permutation of [1..10000000]
 Result verified!
 
-real	0m1.864s
-user	0m4.244s
-sys	0m0.028s
-time ./qsort-omp 10000000 8
+real	0m2.897s
+user	0m6.093s
+sys	0m2.136s
+time ./qsort-pthd 10000000 8
 Initialized array to a random permutation of [1..10000000]
 Result verified!
 
-real	0m1.416s
-user	0m4.393s
-sys	0m0.020s
-time ./qsort-omp 10000000 16
+real	0m2.796s
+user	0m6.629s
+sys	0m7.494s
+time ./qsort-pthd 10000000 16
 Initialized array to a random permutation of [1..10000000]
 Result verified!
 
-real	0m1.467s
-user	0m7.994s
-sys	0m0.040s
-time ./qsort-omp 10000000 32
+real	0m8.892s
+user	0m8.745s
+sys	1m35.422s
+time ./qsort-pthd 10000000 32
 Initialized array to a random permutation of [1..10000000]
 Result verified!
 
-real	0m1.613s
-user	0m6.759s
-sys	0m8.810s
-time ./qsort-omp 10000000 64
+real	0m18.957s
+user	0m12.722s
+sys	7m14.551s
+time ./qsort-pthd 10000000 64
 Initialized array to a random permutation of [1..10000000]
 Result verified!
 
-real	0m1.860s
-user	0m7.710s
-sys	0m17.881s
-time ./qsort-omp 10000000 128
+real	0m17.203s
+user	0m12.071s
+sys	6m59.447s
+time ./qsort-pthd 10000000 128
 Initialized array to a random permutation of [1..10000000]
 Result verified!
 
-real	0m2.194s
-user	0m9.603s
-sys	0m23.133s
-time ./qsort-omp 100000000 1
+real	0m10.841s
+user	0m11.373s
+sys	4m34.452s
+time ./qsort-pthd 100000000 1
 Initialized array to a random permutation of [1..100000000]
 Result verified!
 
-real	0m43.357s
-user	0m43.145s
+real	0m45.857s
+user	0m45.666s
 sys	0m0.140s
-time ./qsort-omp 100000000 2
+time ./qsort-pthd 100000000 2
 Initialized array to a random permutation of [1..100000000]
 Result verified!
 
-real	0m29.926s
-user	0m48.057s
-sys	0m0.120s
-time ./qsort-omp 100000000 4
+real	0m32.870s
+user	0m53.397s
+sys	0m2.993s
+time ./qsort-pthd 100000000 4
 Initialized array to a random permutation of [1..100000000]
 Result verified!
 
-real	0m20.862s
-user	0m45.582s
-sys	0m0.120s
-time ./qsort-omp 100000000 8
+real	0m28.845s
+user	1m1.135s
+sys	0m20.940s
+time ./qsort-pthd 100000000 8
 Initialized array to a random permutation of [1..100000000]
 Result verified!
 
-real	0m16.657s
-user	0m45.020s
-sys	0m0.140s
-time ./qsort-omp 100000000 16
+real	0m30.014s
+user	1m11.546s
+sys	1m16.278s
+time ./qsort-pthd 100000000 16
 Initialized array to a random permutation of [1..100000000]
 Result verified!
 
-real	0m15.320s
-user	1m3.585s
-sys	0m0.288s
-time ./qsort-omp 100000000 32
+real	0m37.327s
+user	1m19.483s
+sys	4m55.608s
+time ./qsort-pthd 100000000 32
 Initialized array to a random permutation of [1..100000000]
 Result verified!
 
-real	0m16.401s
-user	1m10.313s
-sys	0m55.299s
-time ./qsort-omp 100000000 64
+real	3m27.082s
+user	2m15.294s
+sys	77m52.643s
+time ./qsort-pthd 100000000 64
 Initialized array to a random permutation of [1..100000000]
 Result verified!
 
-real	0m18.919s
-user	1m20.775s
-sys	1m34.418s
-time ./qsort-omp 100000000 128
+real	2m58.471s
+user	2m15.540s
+sys	71m55.452s
+time ./qsort-pthd 100000000 128
 Initialized array to a random permutation of [1..100000000]
 Result verified!
 
-real	0m20.731s
-user	1m34.050s
-sys	2m36.431s
-time ./qsort-omp 1000000000 1
+real	0m49.304s
+user	1m25.297s
+sys	19m11.059s
+time ./qsort-pthd 1000000000 1
 Initialized array to a random permutation of [1..1000000000]
 Result verified!
 
-real	9m6.353s
-user	9m3.616s
-sys	0m1.887s
-time ./qsort-omp 1000000000 2
+real	7m49.146s
+user	7m47.062s
+sys	0m1.695s
+time ./qsort-pthd 1000000000 2
 Initialized array to a random permutation of [1..1000000000]
 Result verified!
 
-real	5m33.423s
-user	8m39.053s
-sys	0m1.100s
-time ./qsort-omp 1000000000 4
+real	6m4.625s
+user	9m44.184s
+sys	0m29.265s
+time ./qsort-pthd 1000000000 4
 Initialized array to a random permutation of [1..1000000000]
 Result verified!
 
-real	3m53.745s
-user	8m13.955s
-sys	0m1.068s
-time ./qsort-omp 1000000000 8
+real	5m3.976s
+user	11m2.345s
+sys	3m48.469s
+time ./qsort-pthd 1000000000 8
 Initialized array to a random permutation of [1..1000000000]
 Result verified!
 
-real	3m12.815s
-user	8m25.590s
-sys	0m1.292s
-time ./qsort-omp 1000000000 16
+real	4m47.594s
+user	11m38.249s
+sys	12m28.116s
+time ./qsort-pthd 1000000000 16
 Initialized array to a random permutation of [1..1000000000]
 Result verified!
 
-real	2m58.542s
-user	9m58.661s
-sys	0m1.832s
-time ./qsort-omp 1000000000 32
+real	6m1.015s
+user	12m40.414s
+sys	48m4.497s
+time ./qsort-pthd 1000000000 32
 Initialized array to a random permutation of [1..1000000000]
 Result verified!
 
-real	3m16.494s
-user	12m7.131s
-sys	3m21.094s
-time ./qsort-omp 1000000000 64
+real	16m16.707s
+user	18m24.873s
+sys	372m27.457s
+time ./qsort-pthd 1000000000 64
 Initialized array to a random permutation of [1..1000000000]
 Result verified!
 
-real	3m2.000s
-user	12m51.010s
-sys	6m31.654s
-time ./qsort-omp 1000000000 128
+real	14m41.260s
+user	19m1.713s
+sys	370m17.574s
+time ./qsort-pthd 1000000000 128
 Initialized array to a random permutation of [1..1000000000]
 Result verified!
 
-real	3m28.268s
-user	15m42.365s
-sys	16m2.813s
-time ./qsort-omp 10000000000 1
+real	17m13.700s
+user	20m45.317s
+sys	432m29.878s
+time ./qsort-pthd 10000000000 1
 Initialized array to a random permutation of [1..1410065408]
 Result verified!
 
-real	13m4.781s
-user	13m0.471s
-sys	0m2.786s
-time ./qsort-omp 10000000000 2
+real	11m8.053s
+user	11m4.479s
+sys	0m2.759s
+time ./qsort-pthd 10000000000 2
 Initialized array to a random permutation of [1..1410065408]
 Result verified!
 
-real	8m42.929s
-user	13m16.008s
-sys	0m1.597s
-time ./qsort-omp 10000000000 4
+real	8m5.091s
+user	13m15.584s
+sys	0m36.190s
+time ./qsort-pthd 10000000000 4
 Initialized array to a random permutation of [1..1410065408]
 Result verified!
 
-real	6m21.064s
-user	12m39.506s
-sys	0m1.420s
-time ./qsort-omp 10000000000 8
+real	7m29.671s
+user	16m3.548s
+sys	4m54.631s
+time ./qsort-pthd 10000000000 8
 Initialized array to a random permutation of [1..1410065408]
 Result verified!
 
-real	5m31.679s
-user	13m12.250s
-sys	0m1.516s
-time ./qsort-omp 10000000000 16
+real	7m26.297s
+user	17m34.262s
+sys	17m17.309s
+time ./qsort-pthd 10000000000 16
 Initialized array to a random permutation of [1..1410065408]
 Result verified!
 
-real	4m56.113s
-user	15m0.679s
-sys	0m3.258s
-time ./qsort-omp 10000000000 32
+real	12m33.872s
+user	22m2.865s
+sys	112m10.802s
+time ./qsort-pthd 10000000000 32
 Initialized array to a random permutation of [1..1410065408]
 Result verified!
 
-real	5m19.864s
-user	18m18.431s
-sys	5m49.635s
-time ./qsort-omp 10000000000 64
+real	19m1.691s
+user	26m35.024s
+sys	405m56.011s
+time ./qsort-pthd 10000000000 64
 Initialized array to a random permutation of [1..1410065408]
 Result verified!
 
-real	5m20.634s
-user	18m46.725s
-sys	13m35.912s
-time ./qsort-omp 10000000000 128
+real	13m46.079s
+user	23m4.307s
+sys	314m12.701s
+time ./qsort-pthd 10000000000 128
 Initialized array to a random permutation of [1..1410065408]
 Result verified!
 
-real	5m42.505s
-user	21m8.581s
-sys	20m39.089s
+real	12m18.495s
+user	23m35.966s
+sys	279m26.822s
