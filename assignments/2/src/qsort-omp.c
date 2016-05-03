@@ -90,12 +90,13 @@ void quicksort(int *array, int low, int high) {
         return;
     }
     int middle = partition(array, low, high);
+    // each quicksort call assigned to a new thread
         if (low < middle) {
-        #pragma omp task firstprivate(array, low, middle)
+            #pragma omp task firstprivate(array, low, middle)
             quicksort(array, low, middle - 1);
         }
         if (middle < high) {
-            #pragma omp task firstprivate(array, middle, high)
+            //#pragma omp task firstprivate(array, middle, high)
             quicksort(array, middle + 1, high);
         }
 }
@@ -107,7 +108,7 @@ int main(int argc, char **argv) {
 
     // check command line first
     if (argc < 2) {
-        printf("Usage: ./qsort <N> [NUM THREADS]\n");
+        printf("Usage: ./qsort <N> [NUM THREADS default is 1]\n");
         exit(0);
     }
     if ((N = atoi(argv[1])) < 2) {
@@ -125,8 +126,10 @@ int main(int argc, char **argv) {
     array = init_array(N);
 
     //  printf("Sorting started ...\n");
-# pragma omp parallel
+    // Declare first parallel region
+    # pragma omp parallel
     {
+        // make sure first quicksort executed by only one thread.
         #pragma omp single nowait
         quicksort(array, 0, N - 1);
         //  printf("... completed.\n");
