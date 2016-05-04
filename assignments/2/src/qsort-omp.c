@@ -35,7 +35,9 @@ int *init_array(int N) {
         array[i] = i + 1;
     }
     srand(time(NULL));
-    for (int i = 0; i < N; i++) {
+    int i;
+    // # pragma omp parallel for shared(i)
+    for (i = 0; i < N; i++) {
         int j = (rand() * 1. / RAND_MAX) * (N - 1);
         swap(array, i, j);
     }
@@ -96,7 +98,7 @@ void quicksort(int *array, int low, int high) {
             quicksort(array, low, middle - 1);
         }
         if (middle < high) {
-            //#pragma omp task firstprivate(array, middle, high)
+            #pragma omp task firstprivate(array, middle, high)
             quicksort(array, middle + 1, high);
         }
 }
@@ -131,8 +133,11 @@ int main(int argc, char **argv) {
     {
         // make sure first quicksort executed by only one thread.
         #pragma omp single nowait
-        quicksort(array, 0, N - 1);
-        //  printf("... completed.\n");
+        {
+            printf("Calling quicksort\n");
+            quicksort(array, 0, N - 1);
+            //  printf("... completed.\n");
+        }
     }
 
 
