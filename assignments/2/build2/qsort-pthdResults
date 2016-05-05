@@ -307,3 +307,46 @@ real	5m19.116s
 user	12m24.695s
 sys	13m15.475s
 time ./qsort-pthd 1000000000 16
+Initialized array to a random permutation of [1..1000000000]
+Result verified!
+realI    459.000 s
+initT    108.000 s ratio 0.235
+qsortT   348.000 s ratio 0.758
+verifyT  3.000 s ratio 0.007
+
+real	7m39.352s
+user	15m31.850s
+sys	63m1.935s
+time ./qsort-pthd 1000000000 32
+Initialized array to a random permutation of [1..1000000000]
+Result verified!
+realI    1030.000 s
+initT    107.000 s ratio 0.104
+qsortT   920.000 s ratio 0.893
+verifyT  3.000 s ratio 0.003
+
+real	17m9.779s
+user	18m52.283s
+sys	347m20.784s
+time ./qsort-pthd 1000000000 64
+Initialized array to a random permutation of [1..1000000000]
+Result verified!
+realI    699.000 s
+initT    114.000 s ratio 0.163
+qsortT   582.000 s ratio 0.833
+verifyT  3.000 s ratio 0.004
+
+real	11m39.502s
+user	16m17.828s
+sys	252m19.942s
+time ./qsort-pthd 1000000000 128
+Initialized array to a random permutation of [1..1000000000]
+Result verified!
+realI    641.000 s
+initT    90.000 s ratio 0.140
+qsortT   548.000 s ratio 0.855
+verifyT  3.000 s ratio 0.005
+
+real	10m40.736s
+user	16m20.758s
+sys	241m34.653s
