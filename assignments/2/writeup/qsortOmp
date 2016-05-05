@@ -1,0 +1,67 @@
+realI    0.000 s
+qsortT   0.000 s ratio -nan
+realI    0.000 s
+qsortT   0.000 s ratio -nan
+realI    0.000 s
+qsortT   0.000 s ratio -nan
+realI    0.000 s
+qsortT   0.000 s ratio -nan
+realI    1.000 s
+qsortT   1.000 s ratio 1.000
+realI    0.000 s
+qsortT   0.000 s ratio -nan
+realI    0.000 s
+qsortT   0.000 s ratio -nan
+realI    1.000 s
+qsortT   1.000 s ratio 1.000
+
+realI    4.000 s
+qsortT   3.000 s ratio 0.750
+realI    2.000 s
+qsortT   2.000 s ratio 1.000
+realI    2.000 s
+qsortT   1.000 s ratio 0.500
+realI    1.000 s
+qsortT   0.000 s ratio 0.000
+realI    2.000 s
+qsortT   0.000 s ratio 0.000
+realI    2.000 s
+qsortT   1.000 s ratio 0.500
+realI    3.000 s
+qsortT   2.000 s ratio 0.667
+realI    2.000 s
+qsortT   1.000 s ratio 0.500
+
+realI    42.000 s
+qsortT   32.000 s ratio 0.762
+realI    28.000 s
+qsortT   16.000 s ratio 0.571
+realI    20.000 s
+qsortT   10.000 s ratio 0.500
+realI    13.000 s
+qsortT   5.000 s ratio 0.385
+realI    14.000 s
+qsortT   5.000 s ratio 0.357
+realI    15.000 s
+qsortT   6.000 s ratio 0.400
+realI    16.000 s
+qsortT   7.000 s ratio 0.438
+realI    21.000 s
+qsortT   10.000 s ratio 0.476
+
+realI    473.000 s
+qsortT   371.000 s ratio 0.784
+realI    285.000 s
+qsortT   188.000 s ratio 0.660
+realI    204.000 s
+qsortT   99.000 s ratio 0.485
+realI    173.000 s
+qsortT   61.000 s ratio 0.353
+realI    144.000 s
+qsortT   42.000 s ratio 0.292
+realI    153.000 s
+qsortT   52.000 s ratio 0.340
+realI    166.000 s
+qsortT   60.000 s ratio 0.361
+realI    178.000 s
+qsortT   80.000 s ratio 0.449

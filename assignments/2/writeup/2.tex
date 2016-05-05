@@ -513,4 +513,95 @@ height=5cm, width=\textwidth,
 %\end{semilogxaxis}
 %\end{tikzpicture}
 
+\textbf{Quicksort quicksort only}\\
+
+\begin{minipage}{0.48\textwidth}
+\begin{tikzpicture}
+\begin{semilogxaxis}
+%\begin{loglogaxis}
+[ x tick label style={
+    /pgf/number format/1000 sep=},
+ylabel={Time [seconds]},
+xlabel={World Size [$10^7$]},
+legend style={at={(0.5,-0.3)},
+    anchor=north,legend columns=5,font=\fontsize{3}{1}\selectfont},
+ybar,
+ymajorgrids=true,
+xmajorgrids=true,
+grid style=dashed,
+enlargelimits=0.15,
+scaled y ticks=false,
+xticklabels= {,,},
+height=5cm, width=\textwidth,
+        bar width=0.3cm,
+        ]
+    \addplot coordinates {(10^8,32) }; 
+    \addplot coordinates {(10^8,16) };
+    \addplot coordinates {(10^8,10) };
+    \addplot coordinates {(10^8,5) };
+    \addplot coordinates {(10^8,5) };
+    \addplot coordinates {(10^8,6) };
+    \addplot coordinates {(10^8,7) };
+    \addplot coordinates {(10^8,10) };
+
+    % \addplot coordinates {(10^7,2.531) };
+    % \addplot coordinates {(10^7,3.825) };
+    % \addplot coordinates {(10^7,2.820) };
+    % \addplot coordinates {(10^7,2.897) };
+    % \addplot coordinates {(10^7,2.796) };
+    % \addplot coordinates {(10^7,8.892) };
+    % \addplot coordinates {(10^7,18.957)};
+    % \addplot coordinates {(10^7,17.203)};
+    % \addplot coordinates {(10^7,10.841)};
+\legend{
+, OMP 1 , OMP 2 , OMP 4 , OMP 8 , OMP 16 , OMP 32 , OMP 64 , OMP 128 , PTHD 1 , PTHD 2 , PTHD 4 , PTHD 8 , PTHD 16 , PTHD 32 , PTHD 64 , PTHD 128
+}
+%\end{loglogaxis}
+\end{semilogxaxis}
+\end{tikzpicture}
+\end{minipage}%
+\begin{minipage}{0.48\textwidth}
+\begin{tikzpicture}
+\begin{semilogxaxis}
+%\begin{loglogaxis}
+[ x tick label style={
+    /pgf/number format/1000 sep=},
+ylabel={Time [seconds]},
+legend style={at={(0.5,-0.3)},
+    anchor=north,legend columns=5,font=\fontsize{3}{1}\selectfont},
+ybar,
+ymajorgrids=true,
+xmajorgrids=true,
+xlabel={World Size [$10^8$]},
+grid style=dashed,
+enlargelimits=0.15,
+scaled y ticks=false,
+xticklabels= {,,},
+height=5cm, width=\textwidth,
+        bar width=0.3cm,
+        ]
+    \addplot coordinates {(10^10,371)}; 
+    \addplot coordinates {(10^10,188)};
+    \addplot coordinates {(10^10,99)};
+    \addplot coordinates {(10^10,61)};
+    \addplot coordinates {(10^10,42)};
+    \addplot coordinates {(10^10,52)};
+    \addplot coordinates {(10^10,60)};
+    \addplot coordinates {(10^10,80)};
+    \addplot coordinates {(10^10,371)};
+    \addplot coordinates {(10^10,188)};
+    \addplot coordinates {(10^10,99)};
+    \addplot coordinates {(10^10,61)};
+    \addplot coordinates {(10^10,42)};
+    \addplot coordinates {(10^10,52)};
+    \addplot coordinates {(10^10,60)};
+    \addplot coordinates {(10^10,80)};
+\legend{
+, OMP 1 , OMP 2 , OMP 4 , OMP 8 , OMP 16 , OMP 32 , OMP 64 , OMP 128 , PTHD 1 , PTHD 2 , PTHD 4 , PTHD 8 , PTHD 16 , PTHD 32 , PTHD 64 , PTHD 128
+}
+%\end{loglogaxis}
+\end{semilogxaxis}
+\end{tikzpicture}
+\end{minipage}%
+
 \end{document}

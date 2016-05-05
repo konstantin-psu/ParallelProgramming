@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/u/konstan2/github/ParallelProgramming/assignments/2/src/qsort-omp.c
+stdlib.h
+-
+stdio.h
+-
+time.h
+-
+omp.h
+-
+

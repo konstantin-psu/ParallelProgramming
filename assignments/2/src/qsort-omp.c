@@ -14,6 +14,7 @@
 #include <omp.h>
 
 #define MINSIZE   10        // threshold for switching to bubblesort
+#define SEC(t) (((double)t))
 int THREADS = 1;
 
 // Swap two array elements 
@@ -36,7 +37,6 @@ int *init_array(int N) {
     }
     srand(time(NULL));
     int i;
-    // # pragma omp parallel for shared(i)
     for (i = 0; i < N; i++) {
         int j = (rand() * 1. / RAND_MAX) * (N - 1);
         swap(array, i, j);
@@ -107,10 +107,12 @@ void quicksort(int *array, int low, int high) {
 // 
 int main(int argc, char **argv) {
     int *array, N;
+    time_t start, initT, qsortT, verifyT, fullT;
 
+    start = time(NULL);
     // check command line first
     if (argc < 2) {
-        printf("Usage: ./qsort <N> [NUM THREADS default is 1]\n");
+        printf("Usage: ./qsortT <N> [NUM THREADS default is 1]\n");
         exit(0);
     }
     if ((N = atoi(argv[1])) < 2) {
@@ -126,7 +128,7 @@ int main(int argc, char **argv) {
     omp_set_num_threads(THREADS);
 
     array = init_array(N);
-
+    initT = time(NULL);
     //  printf("Sorting started ...\n");
     // Declare first parallel region
     # pragma omp parallel
@@ -139,8 +141,17 @@ int main(int argc, char **argv) {
             //  printf("... completed.\n");
         }
     }
-
-
+    qsortT =time(NULL);
     verify_array(array, N);
+    verifyT =time(NULL);
+
+    fullT = verifyT - start;
+    verifyT = verifyT - qsortT;
+    qsortT = qsortT - initT;
+    initT = initT - start;
+    printf("realI    %.3f s\n", SEC(fullT));
+    printf("initT    %.3f s ratio %.3f\n", SEC(initT),SEC(initT)/SEC(fullT));
+    printf("qsortT   %.3f s ratio %.3f\n", SEC(qsortT),SEC(qsortT)/SEC(fullT));
+    printf("verifyT  %.3f s ratio %.3f\n", SEC(verifyT),SEC(verifyT)/SEC(fullT));
 }
 

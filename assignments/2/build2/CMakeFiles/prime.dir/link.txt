@@ -1,0 +1,1 @@
+/usr/bin/cc   -std=c99 -g -fopenmp    CMakeFiles/prime.dir/src/prime.c.o  -o prime -rdynamic -lm 

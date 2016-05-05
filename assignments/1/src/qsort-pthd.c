@@ -16,6 +16,7 @@
 #include <pthread.h>
 #include <unistd.h>
 
+#define SEC(t) (((double)t))
 
 /**
  * Global variables
@@ -196,6 +197,9 @@ void consumer(long wid) {
 //
 int main(int argc, char **argv) {
     int N;
+    time_t start, initT, qsortT, verifyT, fullT;
+
+    start = time(NULL);
 
     // check command line first
     if (argc < 2) {
@@ -222,6 +226,7 @@ int main(int argc, char **argv) {
     // Initialization section
     pthread_t thread[numConsumers];
     array = init_array(N);
+    initT = time(NULL);
     sharedQueue = init_queue(0);
     initialTask = create_task(0, N-1);
 
@@ -247,7 +252,18 @@ int main(int argc, char **argv) {
     pthread_mutex_destroy(&taskLock);
     pthread_mutex_destroy(&clientLock);
 
+    qsortT =time(NULL);
     verify_array(array, N);
+    verifyT =time(NULL);
+
+    fullT = verifyT - start;
+    verifyT = verifyT - qsortT;
+    qsortT = qsortT - initT;
+    initT = initT - start;
+    printf("realI    %.3f s\n", SEC(fullT));
+    printf("initT    %.3f s ratio %.3f\n", SEC(initT),SEC(initT)/SEC(fullT));
+    printf("qsortT   %.3f s ratio %.3f\n", SEC(qsortT),SEC(qsortT)/SEC(fullT));
+    printf("verifyT  %.3f s ratio %.3f\n", SEC(verifyT),SEC(verifyT)/SEC(fullT));
     free(array);
     free(sharedQueue);
 }

@@ -1,0 +1,384 @@
+time ./qsort-omp 1000000 1
+Initialized array to a random permutation of [1..1000000]
+Calling quicksort
+Result verified!
+realI    0.000 s
+initT    0.000 s ratio -nan
+qsortT   0.000 s ratio -nan
+verifyT  0.000 s ratio -nan
+
+real	0m0.293s
+user	0m0.281s
+sys	0m0.008s
+time ./qsort-omp 1000000 2
+Initialized array to a random permutation of [1..1000000]
+Calling quicksort
+Result verified!
+realI    0.000 s
+initT    0.000 s ratio -nan
+qsortT   0.000 s ratio -nan
+verifyT  0.000 s ratio -nan
+
+real	0m0.174s
+user	0m0.284s
+sys	0m0.016s
+time ./qsort-omp 1000000 4
+Initialized array to a random permutation of [1..1000000]
+Calling quicksort
+Result verified!
+realI    0.000 s
+initT    0.000 s ratio -nan
+qsortT   0.000 s ratio -nan
+verifyT  0.000 s ratio -nan
+
+real	0m0.117s
+user	0m0.315s
+sys	0m0.000s
+time ./qsort-omp 1000000 8
+Initialized array to a random permutation of [1..1000000]
+Calling quicksort
+Result verified!
+realI    0.000 s
+initT    0.000 s ratio -nan
+qsortT   0.000 s ratio -nan
+verifyT  0.000 s ratio -nan
+
+real	0m0.111s
+user	0m0.448s
+sys	0m0.013s
+time ./qsort-omp 1000000 16
+Initialized array to a random permutation of [1..1000000]
+Calling quicksort
+Result verified!
+realI    1.000 s
+initT    0.000 s ratio 0.000
+qsortT   1.000 s ratio 1.000
+verifyT  0.000 s ratio 0.000
+
+real	0m0.154s
+user	0m1.089s
+sys	0m0.017s
+time ./qsort-omp 1000000 32
+Initialized array to a random permutation of [1..1000000]
+Calling quicksort
+Result verified!
+realI    0.000 s
+initT    0.000 s ratio -nan
+qsortT   0.000 s ratio -nan
+verifyT  0.000 s ratio -nan
+
+real	0m0.219s
+user	0m1.010s
+sys	0m0.749s
+time ./qsort-omp 1000000 64
+Initialized array to a random permutation of [1..1000000]
+Calling quicksort
+Result verified!
+realI    0.000 s
+initT    0.000 s ratio -nan
+qsortT   0.000 s ratio -nan
+verifyT  0.000 s ratio -nan
+
+real	0m0.544s
+user	0m1.995s
+sys	0m8.362s
+time ./qsort-omp 1000000 128
+Initialized array to a random permutation of [1..1000000]
+Calling quicksort
+Result verified!
+realI    1.000 s
+initT    0.000 s ratio 0.000
+qsortT   1.000 s ratio 1.000
+verifyT  0.000 s ratio 0.000
+
+real	0m0.604s
+user	0m2.714s
+sys	0m12.074s
+time ./qsort-omp 10000000 1
+Initialized array to a random permutation of [1..10000000]
+Calling quicksort
+Result verified!
+realI    4.000 s
+initT    1.000 s ratio 0.250
+qsortT   3.000 s ratio 0.750
+verifyT  0.000 s ratio 0.000
+
+real	0m3.564s
+user	0m3.544s
+sys	0m0.016s
+time ./qsort-omp 10000000 2
+Initialized array to a random permutation of [1..10000000]
+Calling quicksort
+Result verified!
+realI    2.000 s
+initT    0.000 s ratio 0.000
+qsortT   2.000 s ratio 1.000
+verifyT  0.000 s ratio 0.000
+
+real	0m2.468s
+user	0m3.956s
+sys	0m0.016s
+time ./qsort-omp 10000000 4
+Initialized array to a random permutation of [1..10000000]
+Calling quicksort
+Result verified!
+realI    2.000 s
+initT    1.000 s ratio 0.500
+qsortT   1.000 s ratio 0.500
+verifyT  0.000 s ratio 0.000
+
+real	0m1.681s
+user	0m3.754s
+sys	0m0.020s
+time ./qsort-omp 10000000 8
+Initialized array to a random permutation of [1..10000000]
+Calling quicksort
+Result verified!
+realI    1.000 s
+initT    1.000 s ratio 1.000
+qsortT   0.000 s ratio 0.000
+verifyT  0.000 s ratio 0.000
+
+real	0m1.436s
+user	0m4.011s
+sys	0m0.016s
+time ./qsort-omp 10000000 16
+Initialized array to a random permutation of [1..10000000]
+Calling quicksort
+Result verified!
+realI    2.000 s
+initT    1.000 s ratio 0.500
+qsortT   0.000 s ratio 0.000
+verifyT  1.000 s ratio 0.500
+
+real	0m1.410s
+user	0m6.579s
+sys	0m0.017s
+time ./qsort-omp 10000000 32
+Initialized array to a random permutation of [1..10000000]
+Calling quicksort
+Result verified!
+realI    2.000 s
+initT    0.000 s ratio 0.000
+qsortT   1.000 s ratio 0.500
+verifyT  1.000 s ratio 0.500
+
+real	0m2.004s
+user	0m7.508s
+sys	0m13.276s
+time ./qsort-omp 10000000 64
+Initialized array to a random permutation of [1..10000000]
+Calling quicksort
+Result verified!
+realI    3.000 s
+initT    1.000 s ratio 0.333
+qsortT   2.000 s ratio 0.667
+verifyT  0.000 s ratio 0.000
+
+real	0m3.167s
+user	0m11.157s
+sys	0m43.189s
+time ./qsort-omp 10000000 128
+Initialized array to a random permutation of [1..10000000]
+Calling quicksort
+Result verified!
+realI    2.000 s
+initT    1.000 s ratio 0.500
+qsortT   1.000 s ratio 0.500
+verifyT  0.000 s ratio 0.000
+
+real	0m2.581s
+user	0m13.497s
+sys	0m27.011s
+time ./qsort-omp 100000000 1
+Initialized array to a random permutation of [1..100000000]
+Calling quicksort
+Result verified!
+realI    42.000 s
+initT    9.000 s ratio 0.214
+qsortT   32.000 s ratio 0.762
+verifyT  1.000 s ratio 0.024
+
+real	0m41.519s
+user	0m41.360s
+sys	0m0.124s
+time ./qsort-omp 100000000 2
+Initialized array to a random permutation of [1..100000000]
+Calling quicksort
+Result verified!
+realI    28.000 s
+initT    11.000 s ratio 0.393
+qsortT   16.000 s ratio 0.571
+verifyT  1.000 s ratio 0.036
+
+real	0m27.752s
+user	0m42.356s
+sys	0m0.116s
+time ./qsort-omp 100000000 4
+Initialized array to a random permutation of [1..100000000]
+Calling quicksort
+Result verified!
+realI    20.000 s
+initT    10.000 s ratio 0.500
+qsortT   10.000 s ratio 0.500
+verifyT  0.000 s ratio 0.000
+
+real	0m20.256s
+user	0m44.451s
+sys	0m0.124s
+time ./qsort-omp 100000000 8
+Initialized array to a random permutation of [1..100000000]
+Calling quicksort
+Result verified!
+realI    13.000 s
+initT    8.000 s ratio 0.615
+qsortT   5.000 s ratio 0.385
+verifyT  0.000 s ratio 0.000
+
+real	0m13.631s
+user	0m41.745s
+sys	0m0.120s
+time ./qsort-omp 100000000 16
+Initialized array to a random permutation of [1..100000000]
+Calling quicksort
+Result verified!
+realI    14.000 s
+initT    8.000 s ratio 0.571
+qsortT   5.000 s ratio 0.357
+verifyT  1.000 s ratio 0.071
+
+real	0m13.118s
+user	1m1.665s
+sys	0m0.281s
+time ./qsort-omp 100000000 32
+Initialized array to a random permutation of [1..100000000]
+Calling quicksort
+Result verified!
+realI    15.000 s
+initT    8.000 s ratio 0.533
+qsortT   6.000 s ratio 0.400
+verifyT  1.000 s ratio 0.067
+
+real	0m15.140s
+user	1m10.109s
+sys	1m3.253s
+time ./qsort-omp 100000000 64
+Initialized array to a random permutation of [1..100000000]
+Calling quicksort
+Result verified!
+realI    16.000 s
+initT    9.000 s ratio 0.562
+qsortT   7.000 s ratio 0.438
+verifyT  0.000 s ratio 0.000
+
+real	0m16.389s
+user	1m15.085s
+sys	1m21.409s
+time ./qsort-omp 100000000 128
+Initialized array to a random permutation of [1..100000000]
+Calling quicksort
+Result verified!
+realI    21.000 s
+initT    11.000 s ratio 0.524
+qsortT   10.000 s ratio 0.476
+verifyT  0.000 s ratio 0.000
+
+real	0m21.262s
+user	1m30.925s
+sys	2m51.106s
+time ./qsort-omp 1000000000 1
+Initialized array to a random permutation of [1..1000000000]
+Calling quicksort
+Result verified!
+realI    473.000 s
+initT    100.000 s ratio 0.211
+qsortT   371.000 s ratio 0.784
+verifyT  2.000 s ratio 0.004
+
+real	7m53.068s
+user	7m51.730s
+sys	0m1.080s
+time ./qsort-omp 1000000000 2
+Initialized array to a random permutation of [1..1000000000]
+Calling quicksort
+Result verified!
+realI    285.000 s
+initT    94.000 s ratio 0.330
+qsortT   188.000 s ratio 0.660
+verifyT  3.000 s ratio 0.011
+
+real	4m44.782s
+user	7m43.002s
+sys	0m0.856s
+time ./qsort-omp 1000000000 4
+Initialized array to a random permutation of [1..1000000000]
+Calling quicksort
+Result verified!
+realI    204.000 s
+initT    102.000 s ratio 0.500
+qsortT   99.000 s ratio 0.485
+verifyT  3.000 s ratio 0.015
+
+real	3m24.222s
+user	7m53.072s
+sys	0m1.097s
+time ./qsort-omp 1000000000 8
+Initialized array to a random permutation of [1..1000000000]
+Calling quicksort
+Result verified!
+realI    173.000 s
+initT    109.000 s ratio 0.630
+qsortT   61.000 s ratio 0.353
+verifyT  3.000 s ratio 0.017
+
+real	2m52.210s
+user	8m9.828s
+sys	0m1.261s
+time ./qsort-omp 1000000000 16
+Initialized array to a random permutation of [1..1000000000]
+Calling quicksort
+Result verified!
+realI    144.000 s
+initT    99.000 s ratio 0.688
+qsortT   42.000 s ratio 0.292
+verifyT  3.000 s ratio 0.021
+
+real	2m23.877s
+user	9m0.733s
+sys	0m1.781s
+time ./qsort-omp 1000000000 32
+Initialized array to a random permutation of [1..1000000000]
+Calling quicksort
+Result verified!
+realI    153.000 s
+initT    98.000 s ratio 0.641
+qsortT   52.000 s ratio 0.340
+verifyT  3.000 s ratio 0.020
+
+real	2m33.191s
+user	11m59.522s
+sys	5m47.446s
+time ./qsort-omp 1000000000 64
+Initialized array to a random permutation of [1..1000000000]
+Calling quicksort
+Result verified!
+realI    166.000 s
+initT    103.000 s ratio 0.620
+qsortT   60.000 s ratio 0.361
+verifyT  3.000 s ratio 0.018
+
+real	2m45.829s
+user	12m22.971s
+sys	8m51.870s
+time ./qsort-omp 1000000000 128
+Initialized array to a random permutation of [1..1000000000]
+Calling quicksort
+Result verified!
+realI    178.000 s
+initT    95.000 s ratio 0.534
+qsortT   80.000 s ratio 0.449
+verifyT  3.000 s ratio 0.017
+
+real	2m58.585s
+user	14m30.416s
+sys	16m8.664s
