@@ -1,4 +1,0 @@
-/u/konstan2/github/ParallelProgramming/assignments/2/build2/CMakeFiles/prime.dir
-/u/konstan2/github/ParallelProgramming/assignments/2/build2/CMakeFiles/prime-omp.dir
-/u/konstan2/github/ParallelProgramming/assignments/2/build2/CMakeFiles/qsort.dir
-/u/konstan2/github/ParallelProgramming/assignments/2/build2/CMakeFiles/qsort-omp.dir

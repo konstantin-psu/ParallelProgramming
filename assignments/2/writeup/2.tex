@@ -16,7 +16,7 @@
 \usepackage[shortlabels]{enumitem}
 
 \usepackage{pgfplots}
-\pgfplotsset{width=10cm,compat=1.9}
+\usepgfplotslibrary{colorbrewer}
 
 
 \setlist[enumerate, 1]{1\textsuperscript{o}}
@@ -119,13 +119,11 @@
 \newcommand{\Bias}{\mathrm{Bias}}
 
 \begin{document}
-
-
 \maketitle
 
 \pagebreak
 
-\section{\textbf{Primes}} \\
+\section{\textbf{Primes}}
 As you can see from the graph - parallel Primes algorithm performed better than sequential
 version in all cases, with
 one exception: OMP with one thread is always slower than the sequential implementation. 
@@ -210,7 +208,7 @@ quicksort      &     4.247          &    39.907 & 425.748  & 653.039 \\
 
 \pagebreak
 
-\section{\textbf{Quick sort}} \\
+\section{\textbf{Quick sort}}
 
 Quick sort is much more suitable for parallelization since we only need to wait for the
 current chunk of the array to be partitioned and no other synchronization. At first I had
@@ -226,12 +224,12 @@ existing thread is assigned new parallel region. \\
 This approach nearly doubles the performance as soon as number of threads is two or more.
 Further increase of threads, gives slower performance boost, about \%20 percent with each
 level (up to 16 threads). After number of threads reached 32 we can see some performance
-degradation by \%8 in average (with each threads increase). I assume that this problems comes
-from frequent task switches. Each time new task is created some thread is reassigned to it and 
-the Program performs task switch, as number of array partitions grows task switches executed
-much more frequent. Each task switch most likely is performed along local cache update, since
-threads are reassigned to random regions of array. \\
-Hence the slow down.
+degradation by \%8 in average (with each thread number increase). 
+This behaviour usually rises when number of threads exceeds number of available work,
+managing these waiting threads creates additional penalty. Hence the slow down. And in 
+this case threads have to wait for partitioning to be complete, and new values for low and
+high to be computed. According to my test run most optimal number of cores for qsort is 16.
+
 Another thing worth mentioning, one thread OMP quicksort struggles from the same issue as 
 prime, it is slower than sequential version by a constant factor.
 
@@ -240,18 +238,37 @@ prime, it is slower than sequential version by a constant factor.
 Pthread version of qsort is faster than sequential, but ($\approx 2x$ in the best case) slower 
 than OMP. This is expected, since qsort-pthd has multiple bottlenecks, such as shared number
 of producing methods, and queue. This version's performance peak is at NUMTHREADS=8, as
-number of threads increased performance drops to sequential level or much worse. This probably
-happens due to couple of reasons. First, bottlenecks, despite queue being unlimited, 
-it must be locked for read/write operations, hence large number of threads will be waiting
-before it can push a task to a queue, this will also delay tasks consumption. Second, same
-problem as OMP version - cache locality. None of the tested arrays will fit into the L1,L2
-and L3 caches, therefore when task is pushed by one thread and consumed by another, data must
-be propagated through all levels.
+number of threads increased performance drops to sequential level or much worse. 
+In all tests, except $10^9$, Pthread 32 threads performed the worst. I expected to see Pthd
+128 being the slowest in all cases.  This discrepancy, could be related to Babbage
+being a shared machine, with variable load.
+
+\subsection{\textbf{PTHD vs OMP revisited}}
+
+I decided to re-test quicksort to see if Pthread performance inconsistency is a  
+result of public machine variable load, except this time I excluded array initialization
+from time measurement, since it can take up to \%40 of total time. One complication I had
+is granularity of such a test, standard clock() function is useless since it gives a total
+CPU cycles of all participated cores, and C time library maximum granularity is 1 second.
+I omitted tests for world sizes $10^7$ and less, since they were slower than 1 sec, and world
+size $10^{10}$, since machine was too busy at the time.
+
+OMP quicksort is about 3x time faster than the application with array init accounted for, 
+where doubling threads gave about the same performance increase, with most optimal  number of threads =
+16.\\
+On the other hand, Pthread quicksort had similar performance, with one exception: slowest
+case ``threads = 16'', not 32 as in the original run.  Performance decline was again
+sporadic, with ``threads = 128'' being faster, than the worse case. 
 
 \subsection{\textbf{Other issues}} 
 When number of threads is greater than number of available cores, there most likely be
-slowdown, unless some cores are waiting and can run additional threads.
+slowdown, unless some cores are waiting and can run additional threads.\\
 
+\textbf{Results continued on the next page$\dots$}
+
+\pagebreak
+
+\textbf{Quicksort OMP vs Pthread (Array init time included)}\\
 
 \begin{table}[h!]
 \begin{minipage}{0.48\textwidth}
@@ -287,9 +304,6 @@ slowdown, unless some cores are waiting and can run additional threads.
 \end{tabular}
 \end{minipage}%
 \end{table}
-
-
-\pagebreak
 
 \vspace{0.4cm}
 
@@ -470,7 +484,7 @@ height=5cm, width=\textwidth,
 %\end{loglogaxis}
 \end{semilogxaxis}
 \end{tikzpicture}
-\end{minipage}%
+\end{minipage}
 
 %\begin{tikzpicture}
 %\begin{semilogxaxis}
@@ -513,7 +527,47 @@ height=5cm, width=\textwidth,
 %\end{semilogxaxis}
 %\end{tikzpicture}
 
-\textbf{Quicksort quicksort only}\\
+\pagebreak
+
+\textbf{Quicksort OMP vs Pthread (Array init time is not included)}\\
+
+\begin{table}[h!]
+\begin{minipage}{0.48\textwidth}
+\centering
+\caption{Quick Sort OMP (no init) (Time [sec])}
+\label{my-label}
+\begin{tabular}{l|ll}
+&      $10^8$           &    $10^9$ \\ \hline
+1       &       32   &   371        \\ \hline
+2       &       16   &   188        \\ \hline
+4       &       10   &   99         \\ \hline
+8       &       5   &   61         \\ \hline
+16      &       5   &   42           \\ \hline
+32      &       6   &   52         \\ \hline
+64      &       7   &   60         \\ \hline
+128     &       10   &   80         \\ 
+\end{tabular}
+\end{minipage}%
+\begin{minipage}{0.48\textwidth}
+\centering
+\caption{Quick Sort Pthread (no init)(Time [sec])}
+\label{my-label}
+\begin{tabular}{l|llll}
+&      $10^8$       &    $10^9$       \\ \hline
+1       &       36    &   408 \\ \hline
+2       &       27    &   264 \\ \hline
+4       &       22    &   231 \\ \hline
+8       &       22    &   224     \\ \hline
+16      &       33    &   348 \\ \hline
+32      &       58    &   920 \\ \hline
+64      &       51    &   582 \\ \hline
+128     &       44    &   548 \\ 
+\end{tabular}
+\end{minipage}%
+\end{table}
+
+
+
 
 \begin{minipage}{0.48\textwidth}
 \begin{tikzpicture}
@@ -522,7 +576,7 @@ height=5cm, width=\textwidth,
 [ x tick label style={
     /pgf/number format/1000 sep=},
 ylabel={Time [seconds]},
-xlabel={World Size [$10^7$]},
+xlabel={World Size [$10^8$]},
 legend style={at={(0.5,-0.3)},
     anchor=north,legend columns=5,font=\fontsize{3}{1}\selectfont},
 ybar,
@@ -543,18 +597,16 @@ height=5cm, width=\textwidth,
     \addplot coordinates {(10^8,6) };
     \addplot coordinates {(10^8,7) };
     \addplot coordinates {(10^8,10) };
-
-    % \addplot coordinates {(10^7,2.531) };
-    % \addplot coordinates {(10^7,3.825) };
-    % \addplot coordinates {(10^7,2.820) };
-    % \addplot coordinates {(10^7,2.897) };
-    % \addplot coordinates {(10^7,2.796) };
-    % \addplot coordinates {(10^7,8.892) };
-    % \addplot coordinates {(10^7,18.957)};
-    % \addplot coordinates {(10^7,17.203)};
-    % \addplot coordinates {(10^7,10.841)};
+    \addplot coordinates {(10^8,36) }; 
+    \addplot coordinates {(10^8,27) };
+    \addplot coordinates {(10^8,22) };
+    \addplot coordinates {(10^8,22) };
+    \addplot coordinates {(10^8,33) };
+    \addplot coordinates {(10^8,58) };
+    \addplot coordinates {(10^8,51) };
+    \addplot coordinates {(10^8,44) };
 \legend{
-, OMP 1 , OMP 2 , OMP 4 , OMP 8 , OMP 16 , OMP 32 , OMP 64 , OMP 128 , PTHD 1 , PTHD 2 , PTHD 4 , PTHD 8 , PTHD 16 , PTHD 32 , PTHD 64 , PTHD 128
+OMP 1 , OMP 2 , OMP 4 , OMP 8 , OMP 16 , OMP 32 , OMP 64 , OMP 128 , PTHD 1 , PTHD 2 , PTHD 4 , PTHD 8 , PTHD 16 , PTHD 32 , PTHD 64 , PTHD 128
 }
 %\end{loglogaxis}
 \end{semilogxaxis}
@@ -563,8 +615,13 @@ height=5cm, width=\textwidth,
 \begin{minipage}{0.48\textwidth}
 \begin{tikzpicture}
 \begin{semilogxaxis}
+%\begin{axis}
 %\begin{loglogaxis}
-[ x tick label style={
+[ 
+    % colorbrewer values=18,
+    colorbrewer cycle list=Oranges,
+    %cycle list name=Dark2,
+    x tick label style={
     /pgf/number format/1000 sep=},
 ylabel={Time [seconds]},
 legend style={at={(0.5,-0.3)},
@@ -572,7 +629,7 @@ legend style={at={(0.5,-0.3)},
 ybar,
 ymajorgrids=true,
 xmajorgrids=true,
-xlabel={World Size [$10^8$]},
+xlabel={World Size [$10^9$]},
 grid style=dashed,
 enlargelimits=0.15,
 scaled y ticks=false,
@@ -580,27 +637,29 @@ xticklabels= {,,},
 height=5cm, width=\textwidth,
         bar width=0.3cm,
         ]
-    \addplot coordinates {(10^10,371)}; 
-    \addplot coordinates {(10^10,188)};
-    \addplot coordinates {(10^10,99)};
-    \addplot coordinates {(10^10,61)};
-    \addplot coordinates {(10^10,42)};
-    \addplot coordinates {(10^10,52)};
-    \addplot coordinates {(10^10,60)};
-    \addplot coordinates {(10^10,80)};
-    \addplot coordinates {(10^10,371)};
-    \addplot coordinates {(10^10,188)};
-    \addplot coordinates {(10^10,99)};
-    \addplot coordinates {(10^10,61)};
-    \addplot coordinates {(10^10,42)};
-    \addplot coordinates {(10^10,52)};
-    \addplot coordinates {(10^10,60)};
-    \addplot coordinates {(10^10,80)};
+    \addplot coordinates {(10^9,371)}; 
+    \addplot coordinates {(10^9,188)};
+    \addplot coordinates {(10^9,99)};
+    \addplot coordinates {(10^9,61)};
+    \addplot coordinates {(10^9,42)};
+    \addplot coordinates {(10^9,52)};
+    \addplot coordinates {(10^9,60)};
+    \addplot coordinates {(10^9,80)};
+
+    \addplot coordinates {(10^9,408)};
+    \addplot coordinates {(10^9,264)};
+    \addplot coordinates {(10^9,231)};
+    \addplot coordinates {(10^9,224)};
+    \addplot coordinates {(10^9,348)};
+    \addplot coordinates {(10^9,920)};
+    \addplot coordinates {(10^9,582)};
+    \addplot coordinates {(10^9,548)};
 \legend{
-, OMP 1 , OMP 2 , OMP 4 , OMP 8 , OMP 16 , OMP 32 , OMP 64 , OMP 128 , PTHD 1 , PTHD 2 , PTHD 4 , PTHD 8 , PTHD 16 , PTHD 32 , PTHD 64 , PTHD 128
+OMP 1 , OMP 2 , OMP 4 , OMP 8 , OMP 16 , OMP 32 , OMP 64 , OMP 128 , PTHD 1 , PTHD 2 , PTHD 4 , PTHD 8 , PTHD 16 , PTHD 32 , PTHD 64 , PTHD 128
 }
 %\end{loglogaxis}
 \end{semilogxaxis}
+%\end{axis}
 \end{tikzpicture}
 \end{minipage}%
 
