@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
   // open file for read
   MPI_File_open(MPI_COMM_WORLD, argv[1], MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
   // set starting offset for the read operation
-  MPI_File_set_view(fh, 0, MPI_INT, MPI_INT, "native", MPI_INFO_NULL);
+  MPI_File_set_view(fh, rank*8, MPI_INT, MPI_INT, "native", MPI_INFO_NULL);
   // read two integers from the file
   MPI_File_read(fh, buf, 2, MPI_INT, &st);
   MPI_File_close(&fh);

@@ -25,11 +25,11 @@ int main(int argc, char *argv[])
   for (i=0; i<cnt; i++) 
     buf[i] = rank*100 + i;
   // construct output file name
-  sprintf(fname, "%s.%d", "out", rank);
+  sprintf(fname, "%s.%d", "out", "gen");
   // open file for write
   MPI_File_open(MPI_COMM_SELF, fname, MPI_MODE_CREATE|MPI_MODE_RDWR, MPI_INFO_NULL, &fh);
   // set starting offset for the write operation
-  MPI_File_set_view(fh, 0, MPI_INT, MPI_INT, "native", MPI_INFO_NULL);
+  MPI_File_set_view(fh, rank*16, MPI_INT, MPI_INT, "native", MPI_INFO_NULL);
   // write four integers to the file
   MPI_File_write(fh, buf, cnt, MPI_INT, &st);
   MPI_File_close(&fh);
