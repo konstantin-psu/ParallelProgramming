@@ -13,12 +13,16 @@
 #include <stdlib.h>
 
 #define MINSIZE   10        // threshold for switching to bubblesort
-#define DEBUG 1
+#define DEBUG 0
+#define INITSIZE 2
+int arraySize = 0;
 
 
 struct Bucket {
     int size;
+    int maxSize;
     int *elements;
+    int pivot;
 };
 
 // Swap two array elements
@@ -28,6 +32,93 @@ void swap(int *array, int i, int j) {
     int tmp = array[i];
     array[i] = array[j];
     array[j] = tmp;
+}
+
+struct Bucket *initBucketList(int size) {
+    struct Bucket *bucket = (struct Bucket *) malloc(size * sizeof(struct Bucket));
+    int i;
+    int *arr;
+    for (i = 0; i < size; i++) {
+        bucket[i].size = 0;
+        bucket[i].maxSize = INITSIZE;
+        arr = (int *) malloc(INITSIZE * sizeof(int));
+        bucket[i].elements = arr;
+        bucket[i].pivot = -1;
+    }
+    return bucket;
+}
+
+void freeBuckets(struct Bucket *b, int size) {
+    int i;
+    for (i = 0; i < size; i++) {
+        free(b[i].elements);
+    }
+    free(b);
+}
+
+struct Bucket *add(struct Bucket *bucket, int item) {
+    if (!(bucket->size < bucket->maxSize)) { // bucket is full -> expand
+        if (DEBUG) printf("Bucket is too small expanding\n");
+        bucket->maxSize = bucket->maxSize * 2;
+        bucket->elements = realloc(bucket->elements, bucket->maxSize * sizeof(int));
+    }
+
+    bucket->elements[bucket->size] = item;
+    bucket->size++;
+    return bucket;
+}
+
+void printBucketList(struct Bucket *bucket, int size) {
+    int i = 0, j;
+    if (DEBUG)
+    for (i = 0; i < size; i++) {
+        printf("Bucket %d content:\n", i);
+        for (j = 0; j < bucket[i].size; j++) {
+            printf("%d ", bucket[i].elements[j]);
+        }
+        printf("\n");
+
+    }
+}
+
+void printArray(int *arr, int arraySize) {
+    int i = 0;
+    if (DEBUG)
+    for (i = 0; i < arraySize; i++) {
+        printf("%d ", arr[i]);
+    }
+    if (DEBUG) printf("\n");
+}
+
+void fillBuckets(int *array, struct Bucket *buckets, int size) {
+
+    int i = 0, j = 0, pI = 10;
+    int added = 0;
+    // 1. Add pivots to buckets
+    if (size == 1) { //special case
+        if (DEBUG) printf("Special case only single thread is participating\n");
+        for (i = 0; i < arraySize; i++) {
+            add(buckets, array[i]);
+        }
+        return;
+    }
+    for (i = 0; i < size - 1; i++) {
+        buckets[i].pivot = array[pI];
+        pI += 10;
+    }
+    for (i = 0; i < arraySize; i++) {
+        for (j = 0; j < size - 1; j++) {
+            if (array[i] < buckets[j].pivot) {
+                add(buckets + j, array[i]);
+                added = 1;
+                break;
+            }
+        }
+        if (!added) {
+            add(buckets + (size - 1), array[i]);
+        }
+        added = 0;
+    }
 }
 
 // Bubble sort for the base cases
@@ -71,14 +162,14 @@ void quicksort(int *array, int low, int high) {
         quicksort(array, middle + 1, high);
 }
 
-int readData(char *fname, MPI_File *fh, MPI_Status *st, int *buf) {
+int *readData(char *fname, MPI_File *fh, MPI_Status *st, int *buf) {
     int i = 0;
     MPI_Offset size;
     if (DEBUG) printf("Opening file %s\n", fname);
-    MPI_File_open(MPI_COMM_WORLD, fname, MPI_MODE_RDONLY, MPI_INFO_NULL, fh);
+    MPI_File_open(MPI_COMM_SELF, fname, MPI_MODE_RDONLY, MPI_INFO_NULL, fh);
     if (DEBUG) printf("Getting file size\n");
     MPI_File_get_size(*fh, &size);
-    if (DEBUG) printf("File size is %d\n", size);
+    if (DEBUG) printf("File size is %d\n", (int) size);
     buf = (int *) malloc(size);
     // set starting offset for the read operation
     if (DEBUG) printf("Setting view\n");
@@ -87,11 +178,45 @@ int readData(char *fname, MPI_File *fh, MPI_Status *st, int *buf) {
     if (DEBUG) printf("Reading file\n");
     MPI_File_read(*fh, buf, size / 4, MPI_INT, st);
 
+    if (DEBUG == 2)
     for (i = 0; i < size / 4; i++) {
         printf("%d %d\n", i, buf[i]);
     }
     if (DEBUG) printf("Size of int %d\n", sizeof(int));
-    return size / 4;
+    arraySize = size / 4;
+    MPI_File_close(fh);
+    return buf;
+}
+
+void quickSortBucket(int * bucket, int size, int rank) {
+    if (DEBUG) printf("Process %d rank is sorting bucket:\n", rank);
+    printArray(bucket, size);
+
+    if (DEBUG) printf("Process %d quicksort Begin\n", rank);
+    quicksort(bucket, 0, size - 1);
+    if (DEBUG) printf("Process %d quicksort End, sorted array is\n", rank);
+    printArray(bucket, size);
+}
+
+void saveData(int *bucket,int size, int msize,  int rank) {
+
+    if (rank >= 0) {
+        MPI_File fh;
+        MPI_Status st;
+
+        char fname[] = "sortedData";
+        int i = 0;
+        int *buf = bucket;
+        int cnt = size;
+        // construct output file name
+        if (DEBUG) printf("-- %d -- saving data\n", rank);
+        MPI_File_open(MPI_COMM_SELF, fname, MPI_MODE_CREATE | MPI_MODE_RDWR, MPI_INFO_NULL, &fh);
+        // set starting offset for the write operation
+        MPI_File_set_view(fh, bucket[0]* 4, MPI_INT, MPI_INT, "native", MPI_INFO_NULL);
+        // write four integers to the file
+        MPI_File_write(fh, buf, msize, MPI_INT, &st);
+        MPI_File_close(&fh);
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -101,7 +226,10 @@ int main(int argc, char *argv[]) {
     }
 
 
-    int size, rank, *buf, message, tag = 201;
+    int size, rank, *buf, tag = 201;
+    int msize = 0;
+    int prevSize = 0;
+    unsigned message;
     MPI_File fh;
     MPI_Status st;
 
@@ -111,6 +239,7 @@ int main(int argc, char *argv[]) {
 
     int nextRank = (rank + 1) % size;
     int prevRank = (rank + size - 1) % size;
+    struct Bucket *bucket;
     if (rank == 0) {
         int bufSize = 0;
         int toSort = 10 * size;
@@ -118,35 +247,60 @@ int main(int argc, char *argv[]) {
          * 1. Read all data
          * 2. sort first 10*size elements, and selects elements at positions 10, 20, 10(size-1)
          *      as pivots
-         * 3. Partition data into P buckets
+         * 3. Partition data into P bucket
          */
         // quicksort(array, 0, N-1);
         message = size;
 //        MPI_Send(&message,1,MPI_INT,nextRank,tag,MPI_COMM_WORLD);
-        printf("Process %d reading %s\n", rank, argv[1]);
-        bufSize = readData(argv[1], &fh, &st, buf);
+        if (DEBUG) printf("Process %d reading %s\n", rank, argv[1]);
+        buf = readData(argv[1], &fh, &st, buf);
         quicksort(buf, 0, toSort - 1);
-//        printf("Process %d sent to %d value: %d\n", rank, nextRank, message);
+        bucket = initBucketList(size);
+        //printBucketList(bucket, size);
+        if (DEBUG) printf("Array content so far\n");
+        printArray(buf, arraySize);
+        if (DEBUG) printf("Fill bucket\n");
+        fillBuckets(buf, bucket, size);
+        if (DEBUG) printf("Print bucket again\n");
+        //printBucketList(bucket, size);
+
+        int i;
+        if (DEBUG) printf("%d, world size is %d\n", rank, size);
+        for (i = 1; i < size ;i++)
+        {
+            MPI_Send(&bucket[i].size,1,MPI_INT, i, tag, MPI_COMM_WORLD);
+            MPI_Send(bucket[i].elements, bucket[i].size, MPI_INT, i, tag, MPI_COMM_WORLD);
+            MPI_Send(&bucket[i-1].size,1,MPI_INT, i, tag, MPI_COMM_WORLD);
+            if (DEBUG) printf("-- %d --, message sent to %d\n", rank, i);
+        }
+        msize = bucket[0].size;
+        free(buf);
+        buf = bucket[0].elements;
+        prevSize = 0;
     }
 
-//    while (1)
-//    {
-//        MPI_Recv(&message, 1, MPI_INT, prevRank, tag, MPI_COMM_WORLD,
-//                 MPI_STATUS_IGNORE);
-//
-//        if (message != 0) {
-//            --message;
-//            printf("Process %d decremented value: %d\n", rank, message);
-//        }
-//
-//        MPI_Send(&message, 1, MPI_INT, nextRank, tag, MPI_COMM_WORLD);
-//
-//        if (0 == message) {
-//            printf("Process %d exiting\n", rank);
-//            break;
-//        }
-//    }
+    if (rank != 0) {
+        if (DEBUG) printf("Process %d is waiting for a message with data *******************************\n", rank);
+        MPI_Recv(&msize, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        buf = (int *) malloc(msize*sizeof(int));
+        MPI_Recv(buf, msize, MPI_INT, 0, tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        if (DEBUG) printf("Process %d data  is *******************************\n", rank);
+        printArray(buf,msize);
+        MPI_Recv(&prevSize, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
 
+    if (DEBUG) printf("Process %d is starting to sort it's bucket\n", rank);
+    quickSortBucket(buf, msize,  rank);
+    if (DEBUG) printf("-- %d -- : calling save data with prev size = %d\n", rank, prevSize);
+    saveData(buf, prevSize, msize, rank);
+    if (rank == 0) {
+        freeBuckets(bucket, size);
+    } else {
+        free(buf);
+    }
+
+    //
+    // MPI_Barrier(MPI_COMM_WORLD);
     MPI_Finalize();
     return 0;
 }
