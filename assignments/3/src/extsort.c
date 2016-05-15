@@ -228,7 +228,7 @@ int main(int argc, char *argv[]) {
 
 
     int size, rank, *buf, tag = 201;
-    double startTime, readTime, sortStartTime, sortEndTime, saveTime, endTime, pureRead;
+    double startTime, readTime, sortStartTime, sortEndTime, saveTime, endTime, pureRead, sendTime;
     int msize = 0;
     int prevSize = 0;
     unsigned message;
@@ -287,6 +287,7 @@ int main(int argc, char *argv[]) {
         free(buf);
         buf = bucket[0].elements;
         prevSize = 0;
+        sendTime = MPI_Wtime();
     }
 
     if (rank != 0) {
@@ -331,8 +332,10 @@ int main(int argc, char *argv[]) {
 
     if (rank == 0) {
         endTime = MPI_Wtime();
-        printf("Time total time %f sortTime %f, saveTime %f, readtime %f, pure read %f\n", endTime - startTime, sortEndTime - sortStartTime, saveTime - sortEndTime, readTime - startTime, pureRead - startTime);
-        printf("%f %f %f %f %f\n", endTime - startTime, sortEndTime - sortStartTime, saveTime - sortEndTime, readTime - startTime, pureRead - startTime);
+        double totTime = endTime - startTime;
+        printf("Time total time %f sortTime %f, saveTime %f, readtime %f, pure read %f send %f, IOtotal %f\n", endTime - startTime, sortEndTime - sortStartTime, saveTime - sortEndTime, readTime - startTime, pureRead - startTime, sendTime - pureRead, (readTime - startTime) + (saveTime - sortEndTime));
+        printf("%f %f %f %f %f %f %f\n", endTime - startTime, sortEndTime - sortStartTime, saveTime - sortEndTime, readTime - startTime, pureRead - startTime, sendTime - pureRead,(readTime - startTime) + (saveTime - sortEndTime));
+        printf("%f %f %f %f %f %f %f\n", (endTime - startTime)/totTime, (sortEndTime - sortStartTime)/totTime, (saveTime - sortEndTime)/totTime, (readTime - startTime)/totTime, (pureRead - startTime)/totTime, (sendTime - pureRead)/totTime,((readTime - startTime) + (saveTime - sortEndTime))/totTime);
     }
     MPI_Finalize();
     return 0;
