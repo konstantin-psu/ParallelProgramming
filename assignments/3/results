@@ -1,0 +1,105 @@
+2 10000000.txt
+Time total time 2.238672 sortTime 1.328569, saveTime 0.540861, readtime 0.133870, pure read 0.011398
+2.238672 1.328569 0.540861 0.133870 0.011398
+Data in sorted2_10000000.txt are sorted
+
+2 100000000.txt
+Time total time 21.234041 sortTime 13.720840, saveTime 4.890373, readtime 1.253008, pure read 0.068998
+21.234041 13.720840 4.890373 1.253008 0.068998
+Data in sorted2_100000000.txt are sorted
+
+2 200000000.txt
+Time total time 36.626335 sortTime 24.301007, saveTime 6.091774, readtime 2.624412, pure read 0.136520
+36.626335 24.301007 6.091774 2.624412 0.136520
+Data in sorted2_200000000.txt are sorted
+
+4 10000000.txt
+Time total time 1.927651 sortTime 0.702977, saveTime 0.755080, readtime 0.192791, pure read 0.021690
+1.927651 0.702977 0.755080 0.192791 0.021690
+Data in sorted4_10000000.txt are sorted
+
+4 100000000.txt
+Time total time 14.737477 sortTime 7.989665, saveTime 2.403009, readtime 1.707904, pure read 0.070646
+14.737477 7.989665 2.403009 1.707904 0.070646
+Data in sorted4_100000000.txt are sorted
+
+4 200000000.txt
+Time total time 27.111203 sortTime 14.625463, saveTime 4.180457, readtime 3.452017, pure read 0.129722
+27.111203 14.625463 4.180457 3.452017 0.129722
+Data in sorted4_200000000.txt are sorted
+
+8 10000000.txt
+Time total time 2.048716 sortTime 0.370137, saveTime 1.116548, readtime 0.241568, pure read 0.010506
+2.048716 0.370137 1.116548 0.241568 0.010506
+Data in sorted8_10000000.txt are sorted
+
+8 100000000.txt
+Time total time 11.412268 sortTime 3.706518, saveTime 2.315331, readtime 2.287447, pure read 0.072093
+11.412268 3.706518 2.315331 2.287447 0.072093
+Data in sorted8_100000000.txt are sorted
+
+8 200000000.txt
+Time total time 23.243716 sortTime 8.855756, saveTime 3.683087, readtime 4.529380, pure read 0.132659
+23.243716 8.855756 3.683087 4.529380 0.132659
+Data in sorted8_200000000.txt are sorted
+
+16 10000000.txt
+Time total time 1.219994 sortTime 0.185180, saveTime 0.351847, readtime 0.339990, pure read 0.020855
+1.219994 0.185180 0.351847 0.339990 0.020855
+Data in sorted16_10000000.txt are sorted
+
+16 100000000.txt
+Time total time 11.439042 sortTime 1.903004, saveTime 3.026555, readtime 3.220245, pure read 0.072581
+11.439042 1.903004 3.026555 3.220245 0.072581
+Data in sorted16_100000000.txt are sorted
+
+16 200000000.txt
+Time total time 21.214538 sortTime 3.905633, saveTime 4.663022, readtime 6.242411, pure read 0.138694
+21.214538 3.905633 4.663022 6.242411 0.138694
+Data in sorted16_200000000.txt are sorted
+
+32 10000000.txt
+Time total time 3.669185 sortTime 0.086226, saveTime 2.634574, readtime 0.576117, pure read 0.008917
+3.669185 0.086226 2.634574 0.576117 0.008917
+Data in sorted32_10000000.txt are sorted
+
+32 100000000.txt
+Time total time 14.088261 sortTime 1.149392, saveTime 4.665497, readtime 4.839010, pure read 0.070883
+14.088261 1.149392 4.665497 4.839010 0.070883
+Data in sorted32_100000000.txt are sorted
+
+32 200000000.txt
+Time total time 24.747435 sortTime 2.627749, saveTime 6.014910, readtime 9.523270, pure read 0.137989
+24.747435 2.627749 6.014910 9.523270 0.137989
+Data in sorted32_200000000.txt are sorted
+
+64 10000000.txt
+Time total time 1.588381 sortTime 0.054602, saveTime 0.357249, readtime 0.788074, pure read 0.012387
+1.588381 0.054602 0.357249 0.788074 0.012387
+Data in sorted64_10000000.txt are sorted
+
+64 100000000.txt
+Time total time 14.649472 sortTime 0.835198, saveTime 1.457100, readtime 7.960402, pure read 0.068173
+14.649472 0.835198 1.457100 7.960402 0.068173
+Data in sorted64_100000000.txt are sorted
+
+64 200000000.txt
+Time total time 32.285813 sortTime 1.309905, saveTime 8.514632, readtime 15.776765, pure read 0.131614
+32.285813 1.309905 8.514632 15.776765 0.131614
+Data in sorted64_200000000.txt are sorted
+
+128 10000000.txt
+Time total time 7.654717 sortTime 0.028122, saveTime 5.762137, readtime 1.465686, pure read 0.018194
+7.654717 0.028122 5.762137 1.465686 0.018194
+Data in sorted128_10000000.txt are sorted
+
+128 100000000.txt
+Time total time 25.318509 sortTime 0.316780, saveTime 7.011860, readtime 14.477451, pure read 0.066668
+25.318509 0.316780 7.011860 14.477451 0.066668
+Data in sorted128_100000000.txt are sorted
+
+128 200000000.txt
+Time total time 44.586590 sortTime 0.586899, saveTime 8.420985, readtime 28.742343, pure read 0.130664
+44.586590 0.586899 8.420985 28.742343 0.130664
+Data in sorted128_200000000.txt are sorted
+

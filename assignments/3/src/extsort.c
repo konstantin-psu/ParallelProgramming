@@ -16,6 +16,7 @@
 #define DEBUG 0
 #define INITSIZE 2
 int arraySize = 0;
+char * dataFile;
 
 
 struct Bucket {
@@ -204,10 +205,10 @@ void saveData(int *bucket,int size, int msize,  int rank) {
         MPI_File fh;
         MPI_Status st;
 
-        char fname[] = "sortedData";
+        char fname[100];
+        snprintf(fname, sizeof(char)*100, "%s%d_%s", "sorted", size, dataFile);
         int i = 0;
         int *buf = bucket;
-        int cnt = size;
         // construct output file name
         if (DEBUG) printf("-- %d -- saving data\n", rank);
         MPI_File_open(MPI_COMM_SELF, fname, MPI_MODE_CREATE | MPI_MODE_RDWR, MPI_INFO_NULL, &fh);
@@ -227,20 +228,27 @@ int main(int argc, char *argv[]) {
 
 
     int size, rank, *buf, tag = 201;
+    double startTime, readTime, sortStartTime, sortEndTime, saveTime, endTime, pureRead;
     int msize = 0;
     int prevSize = 0;
     unsigned message;
     MPI_File fh;
     MPI_Status st;
 
+
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
+
     int nextRank = (rank + 1) % size;
     int prevRank = (rank + size - 1) % size;
     struct Bucket *bucket;
+    dataFile = argv[1];
     if (rank == 0) {
+        startTime = MPI_Wtime();
+        if (DEBUG) printf("Time start: %f\n", startTime);
+
         int bufSize = 0;
         int toSort = 10 * size;
         /*
@@ -254,6 +262,7 @@ int main(int argc, char *argv[]) {
 //        MPI_Send(&message,1,MPI_INT,nextRank,tag,MPI_COMM_WORLD);
         if (DEBUG) printf("Process %d reading %s\n", rank, argv[1]);
         buf = readData(argv[1], &fh, &st, buf);
+        pureRead = MPI_Wtime();
         quicksort(buf, 0, toSort - 1);
         bucket = initBucketList(size);
         //printBucketList(bucket, size);
@@ -263,6 +272,7 @@ int main(int argc, char *argv[]) {
         fillBuckets(buf, bucket, size);
         if (DEBUG) printf("Print bucket again\n");
         //printBucketList(bucket, size);
+        readTime = MPI_Wtime();
 
         int i;
         if (DEBUG) printf("%d, world size is %d\n", rank, size);
@@ -290,17 +300,40 @@ int main(int argc, char *argv[]) {
     }
 
     if (DEBUG) printf("Process %d is starting to sort it's bucket\n", rank);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    if (!rank) {
+        sortStartTime = MPI_Wtime();
+    }
     quickSortBucket(buf, msize,  rank);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    if (!rank) {
+        sortEndTime = MPI_Wtime();
+    }
+
     if (DEBUG) printf("-- %d -- : calling save data with prev size = %d\n", rank, prevSize);
-    saveData(buf, prevSize, msize, rank);
+    saveData(buf, size, msize, rank);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    if (!rank) {
+        saveTime = MPI_Wtime();
+    }
+
+
     if (rank == 0) {
         freeBuckets(bucket, size);
     } else {
         free(buf);
     }
 
-    //
-    // MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        endTime = MPI_Wtime();
+        printf("Time total time %f sortTime %f, saveTime %f, readtime %f, pure read %f\n", endTime - startTime, sortEndTime - sortStartTime, saveTime - sortEndTime, readTime - startTime, pureRead - startTime);
+        printf("%f %f %f %f %f\n", endTime - startTime, sortEndTime - sortStartTime, saveTime - sortEndTime, readTime - startTime, pureRead - startTime);
+    }
     MPI_Finalize();
     return 0;
 }
