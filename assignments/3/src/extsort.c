@@ -228,7 +228,7 @@ int main(int argc, char *argv[]) {
 
 
     int size, rank, *buf, tag = 201;
-    double startTime, readTime, sortStartTime, sortEndTime, saveTime, endTime, pureRead, sendTime;
+    double startTime, initTime, sortStartTime, sortEndTime, saveTime, endTime, readTime, sendTime;
     int msize = 0;
     int prevSize = 0;
     unsigned message;
@@ -262,7 +262,7 @@ int main(int argc, char *argv[]) {
 //        MPI_Send(&message,1,MPI_INT,nextRank,tag,MPI_COMM_WORLD);
         if (DEBUG) printf("Process %d reading %s\n", rank, argv[1]);
         buf = readData(argv[1], &fh, &st, buf);
-        pureRead = MPI_Wtime();
+        readTime = MPI_Wtime();
         quicksort(buf, 0, toSort - 1);
         bucket = initBucketList(size);
         //printBucketList(bucket, size);
@@ -272,7 +272,7 @@ int main(int argc, char *argv[]) {
         fillBuckets(buf, bucket, size);
         if (DEBUG) printf("Print bucket again\n");
         //printBucketList(bucket, size);
-        readTime = MPI_Wtime();
+        initTime = MPI_Wtime();
 
         int i;
         if (DEBUG) printf("%d, world size is %d\n", rank, size);
@@ -333,9 +333,8 @@ int main(int argc, char *argv[]) {
     if (rank == 0) {
         endTime = MPI_Wtime();
         double totTime = endTime - startTime;
-        printf("Time total time %f sortTime %f, saveTime %f, readtime %f, pure read %f send %f, IOtotal %f\n", endTime - startTime, sortEndTime - sortStartTime, saveTime - sortEndTime, readTime - startTime, pureRead - startTime, sendTime - pureRead, (readTime - startTime) + (saveTime - sortEndTime));
-        printf("%f %f %f %f %f %f %f\n", endTime - startTime, sortEndTime - sortStartTime, saveTime - sortEndTime, readTime - startTime, pureRead - startTime, sendTime - pureRead,(readTime - startTime) + (saveTime - sortEndTime));
-        printf("%f %f %f %f %f %f %f\n", (endTime - startTime)/totTime, (sortEndTime - sortStartTime)/totTime, (saveTime - sortEndTime)/totTime, (readTime - startTime)/totTime, (pureRead - startTime)/totTime, (sendTime - pureRead)/totTime,((readTime - startTime) + (saveTime - sortEndTime))/totTime);
+        printf("Time total time %f sortTime %f, saveTime %f, readtime %f, pure read %f send %f, IOtotal %f\n", endTime - startTime, sortEndTime - sortStartTime, saveTime - sortEndTime, initTime - startTime, readTime - startTime, sendTime - initTime, (readTime - startTime) + (saveTime - sortEndTime));
+        printf("%f %f %f %f %f %f %f\n", endTime - startTime, sortEndTime - sortStartTime, saveTime - sortEndTime, initTime - startTime, readTime - startTime, sendTime - initTime, (readTime - startTime) + (saveTime - sortEndTime));
     }
     MPI_Finalize();
     return 0;
