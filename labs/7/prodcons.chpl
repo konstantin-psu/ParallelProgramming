@@ -52,5 +52,7 @@ proc consumer(id: int) {
 // 
 proc main() {
   begin producer();
-  begin consumer(1);
+  for i in 1..numCons {
+      begin consumer(i);
+  }
 }

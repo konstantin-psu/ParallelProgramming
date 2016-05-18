@@ -1,0 +1,14 @@
+{2..6} - two groups 2 3 and 4 5 6
+
+you can have extra ind : 0 1 {2..6} 7
+                         00   0   3  3 
+
+Every domain has mapping
+D = {1..n} by default all values mapped to locale 0
+BD = D mapped(...) - user specified mapped provided for it
+
+BD1 = BD  - does the domain map carry over - YES we only created an alias, and all the properties of BD carried over
+
+BUT
+
+BD2: domain(1) = BD -- is not the same as BD (map of bd is not inherited) this is a completely new object with sequential map
