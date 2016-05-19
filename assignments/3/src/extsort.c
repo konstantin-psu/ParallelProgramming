@@ -15,7 +15,7 @@
 #define MINSIZE   10        // threshold for switching to bubblesort
 #define DEBUG 0             // DEBUG = 1 enables debug prints
 #define INITSIZE 128        // Initial bucket size
-#define COLLECTTIME 1       // Measure performance
+#define COLLECTTIME 0       // Measure performance
 
 int arraySize = 0;          // Input array size
 char * dataFile;            // Input file name
@@ -194,27 +194,29 @@ int *readData(char *fname, MPI_File *fh, MPI_Status *st, int *buf) {
 // quicksort wrapper
 void quickSortBucket(int * bucket, int size, int rank) {
     quicksort(bucket, 0, size - 1);
+    if (DEBUG) {
+        printf("Sorted by rank %d, size %d\n", rank, size);
+        printArray(bucket, size);
+    }
 }
 
 // Save sorted data by all threads
-void saveData(int *bucket,int size, int msize,  int rank) {
+void saveData(int *bucket, int size, int msize,  int prevSize) {
 
-    if (rank >= 0) {
-        MPI_File fh;
-        MPI_Status st;
+    MPI_File fh;
+    MPI_Status st;
 
-        char fname[100]; // Output file name
-        snprintf(fname, sizeof(char)*100, "%s%d_%s", "sorted", size, dataFile);
-        int *buf = bucket;
-        // construct output file name
-        MPI_File_open(MPI_COMM_SELF, fname, MPI_MODE_CREATE | MPI_MODE_RDWR, MPI_INFO_NULL, &fh);
-        // set starting offset for the write operation
-        // MPI_File_set_view(fh, bucket[0]* 4, MPI_INT, MPI_INT, "native", MPI_INFO_NULL);
-        MPI_File_set_view(fh, bucket[0]* 4, MPI_INT, MPI_INT, "native", MPI_INFO_NULL);
-        // write four integers to the file
-        MPI_File_write(fh, buf, msize, MPI_INT, &st);
-        MPI_File_close(&fh);
-    }
+    char fname[100]; // Output file name
+    snprintf(fname, sizeof(char)*100, "%s%d_%s", "sorted", size, dataFile);
+    int *buf = bucket;
+    // construct output file name
+    MPI_File_open(MPI_COMM_SELF, fname, MPI_MODE_CREATE | MPI_MODE_RDWR, MPI_INFO_NULL, &fh);
+    // set starting offset for the write operation
+    // MPI_File_set_view(fh, bucket[0]* 4, MPI_INT, MPI_INT, "native", MPI_INFO_NULL);
+    MPI_File_set_view(fh, prevSize * 4, MPI_INT, MPI_INT, "native", MPI_INFO_NULL);
+    // write four integers to the file
+    MPI_File_write(fh, buf, msize, MPI_INT, &st);
+    MPI_File_close(&fh);
 }
 
 int main(int argc, char *argv[]) {
@@ -224,10 +226,9 @@ int main(int argc, char *argv[]) {
     }
 
 
-    int size, rank, *buf, tag = 201;
-    double startTime=0, initTime=0, sortStartTime=0, sortEndTime=0, saveTime=0, endTime=0, readTime=0, sendTime=0; // all timer variables
-    int msize = 0;
-    int prevSize = 0;
+    int size = 1, rank = 0, *buf, tag = 201;
+    double startTime=0, initTime=0, sortStartTime=0, sortEndTime=0, saveTime=0, endTime=0, readTime=0, sendTime=0, pivotSort, bucketsInit; // all timer variables
+    int msize = 0,prevSize = 0, i = 0;
     MPI_File fh;
     MPI_Status st;
 
@@ -244,20 +245,28 @@ int main(int argc, char *argv[]) {
     struct Bucket *bucket;
     dataFile = argv[1];
     if (rank == 0) {
-        startTime = MPI_Wtime();
+        if (COLLECTTIME) startTime = MPI_Wtime();
         int toSort = 10 * size;
         buf = readData(argv[1], &fh, &st, buf);
-        readTime = MPI_Wtime();
+        if(DEBUG) {
+            printf("Presorted array");
+            printArray(buf, arraySize);
+        }
+        if (COLLECTTIME) readTime = MPI_Wtime();
         quicksort(buf, 0, toSort - 1);
+        if (COLLECTTIME) pivotSort = MPI_Wtime();
         bucket = initBucketsArray(size);
+        if (COLLECTTIME) bucketsInit = MPI_Wtime();
+
         fillBuckets(buf, bucket, size);
         if (COLLECTTIME) initTime = MPI_Wtime();
-        int i;
+        prevSize = 0;
         for (i = 1; i < size ;i++)
         {
-            MPI_Send(&bucket[i].size,1,MPI_INT, i, tag, MPI_COMM_WORLD);
-            MPI_Send(bucket[i].elements, bucket[i].size, MPI_INT, i, tag, MPI_COMM_WORLD);
-            MPI_Send(&bucket[i-1].size,1,MPI_INT, i, tag, MPI_COMM_WORLD);
+            MPI_Send(&bucket[i].size,1,MPI_INT, i, tag, MPI_COMM_WORLD);                        // Send size of the bucket
+            MPI_Send(bucket[i].elements, bucket[i].size, MPI_INT, i, tag, MPI_COMM_WORLD);      // Send the bucket
+            MPI_Send(&prevSize,1,MPI_INT, i, tag, MPI_COMM_WORLD);
+            prevSize = prevSize + bucket[i].size;
         }
         msize = bucket[0].size;
         free(buf);
@@ -271,6 +280,10 @@ int main(int argc, char *argv[]) {
         buf = (int *) malloc(msize*sizeof(int));
         MPI_Recv(buf, msize, MPI_INT, 0, tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         MPI_Recv(&prevSize, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        if (DEBUG) {
+            printf("Rank %d, received array of size %d at location %d\n", rank , msize, prevSize);
+            printArray(buf, msize);
+        }
     }
 
 
@@ -289,7 +302,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    saveData(buf, size, msize, rank);
+    saveData(buf, size, msize, prevSize);
 
     if (COLLECTTIME) {
         MPI_Barrier(MPI_COMM_WORLD);
@@ -309,13 +322,12 @@ int main(int argc, char *argv[]) {
         MPI_Barrier(MPI_COMM_WORLD);
         if (rank == 0) {
             endTime = MPI_Wtime();
-            double totTime = endTime - startTime;
-            printf("Time total time %f sortTime %f, saveTime %f, initTime %f, readTime %f send %f, IOtotal %f\n",
-                   endTime - startTime, sortEndTime - sortStartTime, saveTime - sortEndTime, initTime - startTime,
+            printf("Time total time %f sortTime %f, saveTime %f, initTime %f, bucketsInit %f, initSort %f, readTime %f send %f, IOtotal %f\n",
+                   endTime - startTime, sortEndTime - sortStartTime, saveTime - sortEndTime, initTime - bucketsInit, bucketsInit - pivotSort, pivotSort - readTime,
                    readTime - startTime, sendTime - initTime, (readTime - startTime) + (saveTime - sortEndTime));
-            printf("%f, %f, %f, %f, %f, %f, %f\n", endTime - startTime, sortEndTime - sortStartTime, saveTime - sortEndTime,
-                   initTime - startTime, readTime - startTime, sendTime - initTime,
-                   (readTime - startTime) + (saveTime - sortEndTime));
+            printf("%f, %f, %f, %f, %f, %f, %f %f, %f\n",
+                   endTime - startTime, sortEndTime - sortStartTime, saveTime - sortEndTime, initTime - bucketsInit, bucketsInit - pivotSort, pivotSort - readTime,
+                   readTime - startTime, sendTime - initTime, (readTime - startTime) + (saveTime - sortEndTime));
         }
     }
     MPI_Finalize();
