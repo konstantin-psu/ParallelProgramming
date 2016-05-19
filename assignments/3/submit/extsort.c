@@ -14,7 +14,7 @@
 
 #define MINSIZE   10        // threshold for switching to bubblesort
 #define DEBUG 0             // DEBUG = 1 enables debug prints
-#define INITSIZE 128        // Initial bucket size
+#define INITSIZE 8          // Initial bucket size
 #define COLLECTTIME 0       // Measure performance
 
 int arraySize = 0;          // Input array size
