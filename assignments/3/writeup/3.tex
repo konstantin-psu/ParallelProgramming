@@ -125,23 +125,28 @@
 
 \section{Implementation details}
 
-Main logic of the Assignment was implemented according to the given specifications. 
-There are few language specific details, 
+Main logic of the Assignment was implemented according to the given specifications, without
+any assumptions about data distribution, except that is is a set of integers. If assumed that
+data is a  list of of contiguous integers $1\dots n$, then memory management becomes
+easy - just need to allocate additional buffer of the same size as input and move items
+to this buffer according to the bucket policy, since pivot is equal to $bucket\ size-1$ in this
+case. \\
 
-First memory management and buckets implementation
-\begin{lstlisting}
-struct Bucket {
-    int size;
-    int maxSize;
-    int *elements;
-    int pivot;
-};
-\end{lstlisting}
+When there is no assumptions, we have two options: 1. Allocate $n\times len(buf)$ bucket
+arrays, where n is number of processes, which is not possible for large inputs. 2. Allocate
+each bucket dynamically as data comes in (introduces performance overhead). 
 
-Where size, is the current number of elements added into the bucket, and maxSize is the
-maximum size of the elements array.
-Since size of each bucket is unknown all buckets start is size = 2, it is expanded as bucket
-overflows.
+I used the second option by creating a bucket structure, each bucket initial size is $8$,
+and it doubles when the bucket filled.\\
+
+After data is received and distributed among buckets, it needs to be sent to appropriate
+process to be sorted, this is done by sending two messages - 1. size of the incoming buffer,
+and 2. the buffer itself. Additional third message indicates number of elements previously
+sent, this information is needed for saving the data.
+
+Upon receiving messages processes sort the data and write it to a file, (name of the file =
+``sorted'' + size + ``\_'' + dataFileName, for example: sorted32\_1000.txt). View of the file
+is set to the number of elements in total of elements before this bucket.\\
 
 
 \section{Performance Analysis}
@@ -176,7 +181,7 @@ with followed data move.
 
 \pagebreak
 
-\begin{tikzpicture}[h!]
+\begin{tikzpicture}
 \begin{axis}[
 title={Sample sort MPI, Init time},
 xlabel={Number of PROCS},
@@ -222,9 +227,10 @@ legend style={legend pos=north west, font=\fontsize{4}{5}\selectfont},
 \end{axis}
 \end{tikzpicture}
 
-\noindent Although it is not clear for me why this operation was the slowest performer, on larger
-number of procs, since it is always executed only by the host machine I expected init time to
-be constant. Initialization time was linearly increasing with number of participating
+\noindent Although it is not clear for me why this operation was the slowest performer,
+especially on larger
+number of procs, since it is always executed only by the host machine.
+Initialization time was linearly increasing with number of participating
 procs, i.e. only number of procs affected init performance but not the data set size.
 
 
