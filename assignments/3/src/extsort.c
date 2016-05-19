@@ -13,22 +13,25 @@
 #include <stdlib.h>
 
 #define MINSIZE   10        // threshold for switching to bubblesort
-#define DEBUG 0
-#define INITSIZE 128
-#define COLLECTTIME 1
+#define DEBUG 0             // DEBUG = 1 enables debug prints
+#define INITSIZE 128        // Initial bucket size
+#define COLLECTTIME 1       // Measure performance
 
-int arraySize = 0;
-char * dataFile;
+int arraySize = 0;          // Input array size
+char * dataFile;            // Input file name
 
 
+// Bucket structure
+// This approach removes any assumption about data distribution
 struct Bucket {
-    int size;
-    int maxSize;
-    int *elements;
-    int pivot;
+    int size;        // Current number of elements in the bucket
+    int maxSize;     // Size of the elements array
+    int *elements;   // array to be sorted
+    int pivot;       // all elements of the array are less then pivot
 };
 
-// Swap two array elements
+
+// Swap two array elements (borrowed from the provided sequential quicksort routine)
 //
 void swap(int *array, int i, int j) {
     if (i == j) return;
@@ -37,20 +40,22 @@ void swap(int *array, int i, int j) {
     array[j] = tmp;
 }
 
-struct Bucket *initBucketList(int size) {
-    struct Bucket *bucket = (struct Bucket *) malloc(size * sizeof(struct Bucket));
+// Allocate buckets (size is equal to the size of participating processes, size of the world)
+struct Bucket *initBucketsArray(int size) {
+    struct Bucket *bucket = (struct Bucket *) malloc(size * sizeof(struct Bucket)); // Allocate bucket
     int i;
     int *arr;
     for (i = 0; i < size; i++) {
-        bucket[i].size = 0;
-        bucket[i].maxSize = INITSIZE;
-        arr = (int *) malloc(INITSIZE * sizeof(int));
-        bucket[i].elements = arr;
-        bucket[i].pivot = -1;
+        bucket[i].size = 0;                             // Initially empty
+        bucket[i].maxSize = INITSIZE;                   // Set max size
+        arr = (int *) malloc(INITSIZE * sizeof(int));   // Create and save Initial array
+        bucket[i].elements = arr;                       //
+        bucket[i].pivot = -1;                           // Some phony pivot value
     }
-    return bucket;
+    return bucket;                                      // return created buckets array
 }
 
+// Destroy buckets
 void freeBuckets(struct Bucket *b, int size) {
     int i;
     for (i = 0; i < size; i++) {
@@ -59,6 +64,9 @@ void freeBuckets(struct Bucket *b, int size) {
     free(b);
 }
 
+// Add an item to the bucket
+// If bucket is full, reallocate memory and save the item
+// otherwise save the item
 struct Bucket *add(struct Bucket *bucket, int item) {
     if (!(bucket->size < bucket->maxSize)) { // bucket is full -> expand
         bucket->maxSize = bucket->maxSize * 2;
@@ -70,6 +78,9 @@ struct Bucket *add(struct Bucket *bucket, int item) {
     return bucket;
 }
 
+// Helper method used for debugging
+// Print content of all the buckets
+// Intented to use only by the host thread
 void printBucketList(struct Bucket *bucket, int size) {
     int i = 0, j;
     for (i = 0; i < size; i++) {
@@ -82,6 +93,8 @@ void printBucketList(struct Bucket *bucket, int size) {
     }
 }
 
+// Helper method used for debugging
+// Print and array content
 void printArray(int *arr, int arraySize) {
     int i = 0;
     for (i = 0; i < arraySize; i++) {
@@ -90,21 +103,20 @@ void printArray(int *arr, int arraySize) {
     printf("\n");
 }
 
-void fillBuckets(int *array, struct Bucket *buckets, int size) {
 
-    int i = 0, j = 0, pI = 10;
-    int added = 0;
-    // 1. Add pivots to buckets
-    if (size == 1) { //special case
-        for (i = 0; i < arraySize; i++) {
-            add(buckets, array[i]);
-        }
-        return;
-    }
+// Scan through the initial array and distribute it's data to
+//  appropriate buckets
+void fillBuckets(int *array, struct Bucket *buckets, int size) {
+    int i = 0, j = 0, pI = 10;          // pI - pivot interval
+    int added = 0;                      // flag
+
+    // save desired pivots
     for (i = 0; i < size - 1; i++) {
         buckets[i].pivot = array[pI];
         pI += 10;
     }
+
+    // distribute data
     for (i = 0; i < arraySize; i++) {
         for (j = 0; j < size - 1; j++) {
             if (array[i] < buckets[j].pivot) {
@@ -113,6 +125,7 @@ void fillBuckets(int *array, struct Bucket *buckets, int size) {
                 break;
             }
         }
+        // if item wasn't added, drop it to the last bucket
         if (!added) {
             add(buckets + (size - 1), array[i]);
         }
@@ -120,7 +133,7 @@ void fillBuckets(int *array, struct Bucket *buckets, int size) {
     }
 }
 
-// Bubble sort for the base cases
+// Bubble sort for the base cases (borrowed form provided sequential sort)
 //
 void bubblesort(int *array, int low, int high) {
     if (low >= high)
@@ -161,15 +174,16 @@ void quicksort(int *array, int low, int high) {
         quicksort(array, middle + 1, high);
 }
 
+// Read provided dataFile
 int *readData(char *fname, MPI_File *fh, MPI_Status *st, int *buf) {
     int i = 0;
     MPI_Offset size;
-    MPI_File_open(MPI_COMM_SELF, fname, MPI_MODE_RDONLY, MPI_INFO_NULL, fh);
-    MPI_File_get_size(*fh, &size);
-    buf = (int *) malloc(size);
-    // set starting offset for the read operation
-    MPI_File_set_view(*fh, 0, MPI_INT, MPI_INT, "native", MPI_INFO_NULL);
-    // read two integers from the file
+    MPI_File_open(MPI_COMM_SELF, fname, MPI_MODE_RDONLY, MPI_INFO_NULL, fh);   // Open the file, only for the local thread
+    MPI_File_get_size(*fh, &size);                                             // Read the file size
+    buf = (int *) malloc(size);                                                // Create array big enough to hold data
+    // set starting offset for the read operation -- not needed
+    // MPI_File_set_view(*fh, 0, MPI_INT, MPI_INT, "native", MPI_INFO_NULL);
+    // read the entire array at once
     MPI_File_read(*fh, buf, size / 4, MPI_INT, st);
 
     arraySize = size / 4;
@@ -177,23 +191,25 @@ int *readData(char *fname, MPI_File *fh, MPI_Status *st, int *buf) {
     return buf;
 }
 
+// quicksort wrapper
 void quickSortBucket(int * bucket, int size, int rank) {
     quicksort(bucket, 0, size - 1);
 }
 
+// Save sorted data by all threads
 void saveData(int *bucket,int size, int msize,  int rank) {
 
     if (rank >= 0) {
         MPI_File fh;
         MPI_Status st;
 
-        char fname[100];
+        char fname[100]; // Output file name
         snprintf(fname, sizeof(char)*100, "%s%d_%s", "sorted", size, dataFile);
-        int i = 0;
         int *buf = bucket;
         // construct output file name
         MPI_File_open(MPI_COMM_SELF, fname, MPI_MODE_CREATE | MPI_MODE_RDWR, MPI_INFO_NULL, &fh);
         // set starting offset for the write operation
+        // MPI_File_set_view(fh, bucket[0]* 4, MPI_INT, MPI_INT, "native", MPI_INFO_NULL);
         MPI_File_set_view(fh, bucket[0]* 4, MPI_INT, MPI_INT, "native", MPI_INFO_NULL);
         // write four integers to the file
         MPI_File_write(fh, buf, msize, MPI_INT, &st);
@@ -209,7 +225,7 @@ int main(int argc, char *argv[]) {
 
 
     int size, rank, *buf, tag = 201;
-    double startTime=0, initTime=0, sortStartTime=0, sortEndTime=0, saveTime=0, endTime=0, readTime=0, sendTime=0;
+    double startTime=0, initTime=0, sortStartTime=0, sortEndTime=0, saveTime=0, endTime=0, readTime=0, sendTime=0; // all timer variables
     int msize = 0;
     int prevSize = 0;
     MPI_File fh;
@@ -220,6 +236,10 @@ int main(int argc, char *argv[]) {
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
+    if (size == 1) {
+        printf("At least two threads needed\n");
+        return 0;
+    }
 
     struct Bucket *bucket;
     dataFile = argv[1];
@@ -229,10 +249,9 @@ int main(int argc, char *argv[]) {
         buf = readData(argv[1], &fh, &st, buf);
         readTime = MPI_Wtime();
         quicksort(buf, 0, toSort - 1);
-        bucket = initBucketList(size);
+        bucket = initBucketsArray(size);
         fillBuckets(buf, bucket, size);
         if (COLLECTTIME) initTime = MPI_Wtime();
-
         int i;
         for (i = 1; i < size ;i++)
         {
@@ -291,10 +310,10 @@ int main(int argc, char *argv[]) {
         if (rank == 0) {
             endTime = MPI_Wtime();
             double totTime = endTime - startTime;
-            printf("Time total time %f sortTime %f, saveTime %f, readtime %f, pure read %f send %f, IOtotal %f\n",
+            printf("Time total time %f sortTime %f, saveTime %f, initTime %f, readTime %f send %f, IOtotal %f\n",
                    endTime - startTime, sortEndTime - sortStartTime, saveTime - sortEndTime, initTime - startTime,
                    readTime - startTime, sendTime - initTime, (readTime - startTime) + (saveTime - sortEndTime));
-            printf("%f %f %f %f %f %f %f\n", endTime - startTime, sortEndTime - sortStartTime, saveTime - sortEndTime,
+            printf("%f, %f, %f, %f, %f, %f, %f\n", endTime - startTime, sortEndTime - sortStartTime, saveTime - sortEndTime,
                    initTime - startTime, readTime - startTime, sendTime - initTime,
                    (readTime - startTime) + (saveTime - sortEndTime));
         }
