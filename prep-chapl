@@ -1,6 +1,4 @@
-#!/bin/bash
-
-export CHPL_HOME=/pkgs/chapel/chapel-1.11.0
+export CHPL_HOME=/pkgs/chapel/chapel-1.12.0
 export CHPL_HOST_PLATFORM=linux64
 export CHPL_COMM=gasnet
 export GASNET_SPAWNFN=S
