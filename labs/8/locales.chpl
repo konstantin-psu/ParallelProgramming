@@ -4,7 +4,5 @@
 //------------------------------------------------------------------------- 
 //
 //
-
-
-coforall loc in Locales do
+for loc in Locales do
     writeln("Locale " + loc.id + ": " + loc.name + " (with " + loc.numCores + " cores)");
