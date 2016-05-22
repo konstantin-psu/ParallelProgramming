@@ -10,7 +10,8 @@ ifeq (run,$(firstword $(MAKECMDGOALS)))
   $(eval $(RUN_ARGS):;@:)
 endif
 
-CURRENT=locales
+#CURRENT=locales
+CURRENT=border
 
 CHPL=chpl
 
@@ -46,4 +47,4 @@ border: border.chpl
 # 	chpl -o $@ $@.chpl
 
 clean:
-	rm -f *_real locales locale[1-4] dmap[1-4]
+	rm -f *_real locales locale[1-4] dmap[1-4] border

@@ -44,3 +44,13 @@ writeln("[CD2] (cyclic from D.high)");
 writeln(c2);
 writeln("[BCD] (block-cyclic (2,3) from D.low)");
 writeln(bc);
+
+var bval = 9;
+
+for i in 1..n {
+    b(1,i) = bval;
+    b(n,i) = bval;
+    b(i,1) = bval;
+    b(i,n) = bval;
+}
+writeln(b);
