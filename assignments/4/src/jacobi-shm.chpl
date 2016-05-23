@@ -9,30 +9,23 @@
 
 config const epsilon = 0.001;	// convergence tolerance
 config const n = 8; 	        // mesh size (including boundary)
+var lock$: sync bool;
 
-proc max(x: real, y: real) {
-    if (x > y) { return x; }
-    return y;
-}
 // Jacobi iteration -- return the iteration count.
 // 
 proc jacobi(D: domain(2), x: [D] real, epsilon: real) { 
     var cnt = 0;			// iteration counter
     var xnew: [D] real = x;
+    const innerDomain = {1..(n-2), 1..(n-2)};
 
-    // ... need code here ...
-
-    //   double xnew[n][n];	// buffer for new values    
-    var delta: real = 0.0;		// measure of convergence   
+    var delta: real = 0.0;
 
     do {	
         delta = 0.0;
-        for i  in 1..(n-2) {
-            for j  in  1..(n-2) {
-                xnew(i,j) = (x(i-1,j) + x(i,j-1) + x(i+1,j) + x(i,j+1)) / 4.0;
-                delta = max(delta, abs(xnew(i,j) - x(i,j)));
-            }
-        }	
+        forall ij in innerDomain do
+            xnew(ij) = (x(ij+(-1,0)) + x(ij+(0,-1)) + x(ij+(1,0)) + x(ij+(0,1))) / 4.0;
+
+        delta = max reduce abs(xnew[innerDomain] - x[innerDomain]);
         x = xnew;
         cnt+= 1;
     } while (delta > epsilon);
@@ -52,12 +45,4 @@ proc main() {
     writeln("Mesh size: ", n, " x ", n, ", epsilon=", epsilon, 
             ", total Jacobi iterations: ", cnt);
     writeln(a);
-    // writeln("");
-    // b = a;
-    // writeln(b);
-    // writeln("");
-    // b = 0.0;
-    // writeln(b);
-    // writeln("");
-    // writeln(a);
 }
