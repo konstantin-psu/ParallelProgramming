@@ -13,7 +13,7 @@
 #include <math.h>
 
 #define EPSILON 0.001 	// convergence tolerance
-#define VERBOSE 0 	// printing control
+#define VERBOSE 1 	// printing control
 
 // Initialize the mesh with a fixed set of boundary conditions.
 // 

@@ -33,16 +33,39 @@ proc jacobi(D: domain(2), x: [D] real, epsilon: real) {
     return cnt;
 }
 
+proc gauss(D: domain(2), x: [D] real, epsilon: real) { 
+    var cnt = 0;			// iteration counter
+    const innerDomain = {1..(n-2), 1..(n-2)};
+
+    var delta: real = 0.0;
+
+    do {	
+        delta = 0.0;
+        forall ij in innerDomain do
+            x(ij) = (x(ij+(-1,0)) + x(ij+(0,-1)) + x(ij+(1,0)) + x(ij+(0,1))) / 4.0;
+
+        delta = max reduce abs(x[innerDomain] - x[innerDomain]);
+        cnt+= 1;
+    } while (delta > epsilon);
+
+    return cnt;
+}
+// int gauss(int n, double x[n][n], double epsilon) {
+// int red_black(int n, double x[n][n], double epsilon) {
+
 // Main routine.
 //
 proc main() {
     const D = {0..n-1, 0..n-1};   // domain including boundary points
     var a: [D] real = 0.0;	// mesh array
-    var b: [D] real = 0.0;	// mesh array
     a[n-1, 0..n-1] = 1.0;         // - setting boundary values
     a[0..n-1, n-1] = 1.0;
     var cnt = jacobi(D, a, epsilon);
     writeln("Mesh size: ", n, " x ", n, ", epsilon=", epsilon, 
             ", total Jacobi iterations: ", cnt);
     writeln(a);
+    a = 0.0;
+    cnt = gauss(D, a, epsilon);
+    writeln("Mesh size: ", n, " x ", n, ", epsilon=", epsilon, 
+            ", total Jacobi iterations: ", cnt);
 }

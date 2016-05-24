@@ -10,7 +10,7 @@ ifeq (run,$(firstword $(MAKECMDGOALS)))
   $(eval $(RUN_ARGS):;@:)
 endif
 
-CURRENT=jacobi-shm
+CURRENT=laplace-shm
 
 CC = gcc
 CHPL = chpl
