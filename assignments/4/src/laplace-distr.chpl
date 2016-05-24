@@ -14,6 +14,7 @@ var lock$: sync bool;
 // Jacobi iteration -- return the iteration count.
 // 
 proc jacobi(D: domain(2), x: [D] real, epsilon: real) { 
+        // converting it pgas style
     var cnt = 0;			// iteration counter
     var xnew: [D] real = x;
     const innerDomain = {1..(n-2), 1..(n-2)};
