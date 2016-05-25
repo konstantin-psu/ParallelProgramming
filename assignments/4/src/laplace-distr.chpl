@@ -6,30 +6,36 @@
 // Jacobi method for solving a Laplace equation.  
 // (shared-memory version)
 //
+use BlockDist;
+use Time;
 
 config const epsilon = 0.001;	// convergence tolerance
 config const n = 8; 	        // mesh size (including boundary)
-var lock$: sync bool;
+
+const D = {1..n, 1..n};
+const BD = D dmapped Block(D);
+var timer: Timer;
 
 // Jacobi iteration -- return the iteration count.
 // 
-proc jacobi(D: domain(2), x: [D] real, epsilon: real) { 
-        // converting it pgas style
+proc jacobi(D: domain(2), x: [BD] real, epsilon: real) { 
+    forall e in x do e = here.id;
+
     var cnt = 0;			// iteration counter
-    var xnew: [D] real = x;
-    const innerDomain = {1..(n-2), 1..(n-2)};
+    // var xnew: [D] real = x;
+    // const innerDomain = {1..(n-2), 1..(n-2)};
 
-    var delta: real = 0.0;
+    // var delta: real = 0.0;
 
-    do {	
-        delta = 0.0;
-        forall ij in innerDomain do
-            xnew(ij) = (x(ij+(-1,0)) + x(ij+(0,-1)) + x(ij+(1,0)) + x(ij+(0,1))) / 4.0;
+    // do {	
+    //     delta = 0.0;
+    //     forall ij in innerDomain do
+    //         xnew(ij) = (x(ij+(-1,0)) + x(ij+(0,-1)) + x(ij+(1,0)) + x(ij+(0,1))) / 4.0;
 
-        delta = max reduce abs(xnew[innerDomain] - x[innerDomain]);
-        x = xnew;
-        cnt+= 1;
-    } while (delta > epsilon);
+    //     delta = max reduce abs(xnew[innerDomain] - x[innerDomain]);
+    //     x = xnew;
+    //     cnt+= 1;
+    // } while (delta > epsilon);
 
     return cnt;
 }
@@ -124,27 +130,31 @@ proc red_black(D: domain(2), x: [D] real, epsilon: real) {
 
 proc run_test(D: domain(2), testType: int) {
     writeln("");
-    var a: [D] real = 0.0;	// mesh array
+    var a: [BD] real = 0;	// mesh array
     var cnt: int = 0;
-    init_array(D,a);
+    // init_array(D,a);
     if (testType == 0) {
+        timer.start();
         writeln("jacobi");
         cnt = jacobi(D, a, epsilon);
-    } else if (testType == 1) {
-        writeln("gauss");
-        cnt = gauss(D, a, epsilon);
-    } else if (testType == 2) {
-        writeln("red black");
-        cnt = red_black(D, a, epsilon);
-        //writeln(a[0..2*(n-1)]);
-        //return;
-    } else {
-        return;
-    }
+        timer.stop();
+    } 
+    // else if (testType == 1) {
+    //     writeln("gauss");
+    //     cnt = gauss(D, a, epsilon);
+    // } else if (testType == 2) {
+    //     writeln("red black");
+    //     cnt = red_black(D, a, epsilon);
+    //     //writeln(a[0..2*(n-1)]);
+    //     //return;
+    // } else {
+    //     return;
+    // }
 
     writeln("Mesh size: ", n, " x ", n, ", epsilon=", epsilon, 
             ", total Jacobi iterations: ", cnt);
-    // writeln(a);
+    writeln("Elapsed time " + timer.elapsed());
+    writeln(a);
 }
 
 proc init_array(D: domain(2), x: [D] real) {
@@ -159,6 +169,7 @@ proc main() {
     const D = {0..n-1, 0..n-1};   // domain including boundary points
     write(n);
     write("");
-    for i in 0..2 do
-        run_test(D, i);
+    // for i in 0..2 do
+    //     run_test(D, i);
+    run_test(D, 0);
 }
