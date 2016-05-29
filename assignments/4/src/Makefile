@@ -15,9 +15,9 @@ CURRENT=laplace-distr
 CC = gcc
 CHPL = chpl
 
-current: $(CURRENT)
-
 all:  jacobi laplace jacobi-shm0 jacobi-shm laplace-shm laplace-distr
+
+current: $(CURRENT)
 
 run: $(CURRENT)
 	./$(CURRENT) -nl $(RUN_ARGS)
