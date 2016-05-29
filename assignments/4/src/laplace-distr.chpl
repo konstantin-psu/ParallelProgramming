@@ -12,42 +12,55 @@ use Time;
 config const epsilon = 0.001;	// convergence tolerance
 config const n = 8; 	        // mesh size (including boundary)
 
-const D = {1..n, 1..n};
+const D = {0..n-1, 0..n-1};
 const BD = D dmapped Block(D);
+const innerDomain = BD.expand((-1,-1));
 var timer: Timer;
+var timer1: Timer;
+var timerTotal: Timer;
+var delta: real = 0.0;
 
 // Jacobi iteration -- return the iteration count.
 // 
 proc jacobi(D: domain(2), x: [BD] real, epsilon: real) { 
-    forall e in x do e = here.id;
+    //forall e in x do e = here.id;
+    // var Inner: subdomain(BD) = {2..n-1,2..n-1};
+    //writeln(Inner);
+    //writeln(BD.interior((0,1)));
+    //for e in D.interior((1,1)) do writeln(e);
+    //for e in x[n-2, 2..n-1] do writeln(e);
+
+    // forall e in BD.expand((-1,-1)) do x(e) = here.id;
 
     var cnt = 0;			// iteration counter
-    // var xnew: [D] real = x;
-    // const innerDomain = {1..(n-2), 1..(n-2)};
+    var xnew: [BD] real = x;
 
-    // var delta: real = 0.0;
 
-    // do {	
-    //     delta = 0.0;
-    //     forall ij in innerDomain do
-    //         xnew(ij) = (x(ij+(-1,0)) + x(ij+(0,-1)) + x(ij+(1,0)) + x(ij+(0,1))) / 4.0;
+    do {	
+        delta = 0.0;
+        timer.start();
+        forall (i,j) in innerDomain do {
+            // write(here.id, " ");
+            xnew(i,j) = (x(i-1,j) + x(i,j-1) + x(i+1,j) + x(i,j+1)) / 4.0;
+        }
 
-    //     delta = max reduce abs(xnew[innerDomain] - x[innerDomain]);
-    //     x = xnew;
-    //     cnt+= 1;
-    // } while (delta > epsilon);
+        timer.stop();
+        timer1.start();
+        delta = max reduce abs(xnew[innerDomain] - x[innerDomain]);
+        x = xnew;
+        timer1.stop();
+        cnt+= 1;
+    } while (delta > epsilon);
 
     return cnt;
 }
 
-proc gaussIter(D: domain(2), x: [D] real, epsilon: real) { 
+proc gaussIter(D: domain(2), x: [BD] real, epsilon: real) { 
     var cnt = 0;			// iteration counter
-    const innerDomain = {1..(n-2), 1..(n-2)};
-
     var delta: real = 0.0;
 
+    delta = 0.0;
     do {	
-        delta = 0.0;
         for ij in innerDomain do {
             var old = x(ij);
             x(ij) = (x(ij+(-1,0)) + x(ij+(0,-1)) + x(ij+(1,0)) + x(ij+(0,1))) / 4.0; 
@@ -59,23 +72,30 @@ proc gaussIter(D: domain(2), x: [D] real, epsilon: real) {
     return cnt;
 }
 
-proc gauss(D: domain(2), x: [D] real, epsilon: real) { 
+proc gauss(D: domain(2), x: [BD] real, epsilon: real) { 
     var cnt = 0;			// iteration counter
-    const innerDomain = {1..(n-2), 1..(n-2)};
-    var xnew: [D] real = x;
+    var xnew: [BD] real = x;
 
-    var delta: real = 0.0;
-
+    //const innerDomain = {1..(n-2), 1..(n-2)};
+    // var delta: real = 0.0;
+    delta = 0.0;
     do {	
-        delta = 0.0;
         xnew = x;
-        forall ij in innerDomain do
-            x(ij) = (x(ij+(-1,0)) + x(ij+(0,-1)) + x(ij+(1,0)) + x(ij+(0,1))) / 4.0;
-
+        timer.start();
+        forall (i,j) in innerDomain do {
+            write(here.id);
+            x(i,j) = (x(i-1,j) + x(i,j-1) + x(i+1,j) + x(i,j+1)) / 4.0;
+        }
+        // forall ij in innerDomain do
+        //     x(ij) = (x(ij+(-1,0)) + x(ij+(0,-1)) + x(ij+(1,0)) + x(ij+(0,1))) / 4.0;
+        timer.stop();
+        timer1.start();
         //delta = max reduce abs(x[innerDomain]);
         delta = max reduce abs(x[innerDomain] - xnew[innerDomain]);
+        timer1.stop();
         cnt+= 1;
     } while (delta > epsilon);
+    //} while (cnt < 370);
 
     return cnt;
 }
@@ -132,17 +152,19 @@ proc run_test(D: domain(2), testType: int) {
     writeln("");
     var a: [BD] real = 0;	// mesh array
     var cnt: int = 0;
-    // init_array(D,a);
+    init_array(D,a);
+    timerTotal.start();
     if (testType == 0) {
-        timer.start();
+        // timer.start();
         writeln("jacobi");
         cnt = jacobi(D, a, epsilon);
-        timer.stop();
+        // timer.stop();
     } 
-    // else if (testType == 1) {
-    //     writeln("gauss");
-    //     cnt = gauss(D, a, epsilon);
-    // } else if (testType == 2) {
+    else if (testType == 1) {
+        writeln("gauss");
+        cnt = gauss(D, a, epsilon);
+    } 
+    // else if (testType == 2) {
     //     writeln("red black");
     //     cnt = red_black(D, a, epsilon);
     //     //writeln(a[0..2*(n-1)]);
@@ -150,11 +172,13 @@ proc run_test(D: domain(2), testType: int) {
     // } else {
     //     return;
     // }
+    timerTotal.stop();
 
     writeln("Mesh size: ", n, " x ", n, ", epsilon=", epsilon, 
             ", total Jacobi iterations: ", cnt);
-    writeln("Elapsed time " + timer.elapsed());
-    writeln(a);
+    writeln("Elapsed distr " + timer.elapsed() + " Time reduce " + timer1.elapsed());
+    writeln("Total time " + timerTotal.elapsed());
+    // writeln(a);
 }
 
 proc init_array(D: domain(2), x: [D] real) {
@@ -171,5 +195,5 @@ proc main() {
     write("");
     // for i in 0..2 do
     //     run_test(D, i);
-    run_test(D, 0);
+    run_test(D, 1);
 }

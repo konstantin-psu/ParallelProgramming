@@ -6,6 +6,8 @@
 // Jacobi method for solving a Laplace equation.  
 // (shared-memory version)
 //
+use Time;
+var timer: Timer;
 
 config const epsilon = 0.001;	// convergence tolerance
 config const n = 8; 	        // mesh size (including boundary)
@@ -127,11 +129,15 @@ proc run_test(D: domain(2), testType: int) {
     var cnt: int = 0;
     init_array(D,a);
     if (testType == 0) {
+        timer.start();
         writeln("jacobi");
         cnt = jacobi(D, a, epsilon);
+        timer.stop();
     } else if (testType == 1) {
+        timer.start();
         writeln("gauss");
         cnt = gauss(D, a, epsilon);
+        timer.stop();
     } else if (testType == 2) {
         writeln("red black");
         cnt = red_black(D, a, epsilon);
@@ -143,6 +149,7 @@ proc run_test(D: domain(2), testType: int) {
 
     writeln("Mesh size: ", n, " x ", n, ", epsilon=", epsilon, 
             ", total Jacobi iterations: ", cnt);
+    writeln("Elapsed time " + timer.elapsed());
     // writeln(a);
 }
 
@@ -158,6 +165,6 @@ proc main() {
     const D = {0..n-1, 0..n-1};   // domain including boundary points
     write(n);
     write("");
-    for i in 0..2 do
+    for i in 1..1 do
         run_test(D, i);
 }
