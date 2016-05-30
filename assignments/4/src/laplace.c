@@ -14,7 +14,7 @@
 #include <time.h>
 #include <stdint.h>
 
-#define EPSILON 0.00001 	// convergence tolerance
+#define EPSILON 0.0001 	// convergence tolerance
 #define VERBOSE 0 	// printing control
 #define DEBUG   0 	// printing control
 #define BILLION 1000000000L
@@ -172,6 +172,8 @@ int main(int argc, char **argv) {
         }
     }
 
+    int convergence[3];
+    double t[3];
     double a[n][n];	// mesh array
     init_array(n, a);
     if (DEBUG) printf("Initalizing array");
@@ -184,27 +186,34 @@ int main(int argc, char **argv) {
     int cnt = jacobi(n, a, EPSILON);
 
     clock_gettime(CLOCK_MONOTONIC, &end); /* mark start time */
+    convergence[0] = cnt;
     diffJ = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
 
-    printf("JACOBI: Mesh size: %d x %d, epsilon=%6.4f, total Jacobi iterations: %d\n", n, n, EPSILON, cnt);
+    if (DEBUG) printf("JACOBI: Mesh size: %d x %d, epsilon=%6.4f, total Jacobi iterations: %d\n", n, n, EPSILON, cnt);
     //printf("elapsed time = %llu nanoseconds\n", (long long unsigned int) diff);
-    printf("elapsed time = %f nanoseconds\n", (diffJ*1.0)/1000000000ULL);
+    if (DEBUG) printf("elapsed time = %f nanoseconds\n", (diffJ*1.0)/1000000000ULL);
+    t[0] =  (diffJ*1.0)/1000000000ULL;
 
     init_array(n, a);
 
     clock_gettime(CLOCK_MONOTONIC, &start); /* mark start time */
     cnt = gauss(n, a, EPSILON);
+    convergence[1] = cnt;
     clock_gettime(CLOCK_MONOTONIC, &end); /* mark start time */
     diffG = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
-    printf("GAUSS:  Mesh size: %d x %d, epsilon=%6.4f, total Jacobi iterations: %d\n", n, n, EPSILON, cnt);
-    printf("elapsed time = %f nanoseconds\n", (diffG*1.0)/1000000000ULL);
+    t[1] =  (diffG*1.0)/1000000000ULL;
+    if (DEBUG) printf("GAUSS:  Mesh size: %d x %d, epsilon=%6.4f, total Jacobi iterations: %d\n", n, n, EPSILON, cnt);
+    if (DEBUG) printf("elapsed time = %f nanoseconds\n", (diffG*1.0)/1000000000ULL);
 
     init_array(n, a);
     clock_gettime(CLOCK_MONOTONIC, &start); /* mark start time */
     cnt = red_black(n, a, EPSILON);
+    convergence[2] = cnt;
     clock_gettime(CLOCK_MONOTONIC, &end); /* mark start time */
     diffR = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
-    printf("Red-Black: Mesh size: %d x %d, epsilon=%6.4f, total Jacobi iterations: %d\n", n, n, EPSILON, cnt);
-    printf("elapsed time = %f nanoseconds\n", (diffR*1.0)/1000000000ULL);
+    t[2] =  (diffR*1.0)/1000000000ULL;
+    if (DEBUG) printf("Red-Black: Mesh size: %d x %d, epsilon=%6.4f, total Jacobi iterations: %d\n", n, n, EPSILON, cnt);
+    if (DEBUG) printf("elapsed time = %f nanoseconds\n", (diffR*1.0)/1000000000ULL);
     if (DEBUG) print_array(n, a);
+    printf("Convergence\nJacobi,Gauss-Seidel,Red-Black\n%d,%d,%d\n%f,%f,%f\n", convergence[0],convergence[1],convergence[2], t[0],t[1],t[2]);
 }

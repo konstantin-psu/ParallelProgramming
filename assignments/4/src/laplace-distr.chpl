@@ -11,7 +11,7 @@ use Time;
 var timer, timer1, timerTotal: Timer;
 
 config const epsilon = 0.001;	// convergence tolerance
-config const n = 8; 	        // mesh size (including boundary)
+config const n = 8, v=0; 	        // mesh size (including boundary)
 const D = {0..n-1, 0..n-1};
 const id = {1..n-2,1..n-2};
 const BD = D dmapped Block(D);
@@ -91,34 +91,26 @@ proc red_black(x: [BD] real, epsilon: real) {
 }
 
 
-proc run_test(testType: int) {
-    writeln("");
+proc run_test(times:[{0..2}] real, res:[{0..2}] int, testType: int) {
     var cnt: int = 0;
-    a=0.0;
     init_array(a);
     timer.clear();
     timer.start();
     if (testType == 0) {
-        writeln("jacobi");
         cnt = jacobi(a, epsilon);
     } else if (testType == 1) {
-        writeln("gauss");
         cnt = gauss(a, epsilon);
     } else if (testType == 2) {
-        writeln("red black");
         cnt = red_black(a, epsilon);
     } else {
         timer.stop();
         return;
     }
     timer.stop();
-
-    writeln("Mesh size: ", n, " x ", n, ", epsilon=", epsilon, 
-            ", total Jacobi iterations: ", cnt);
-    //writeln("Elapsed distr " + timer.elapsed() + " Time reduce " + timer1.elapsed());
-    writeln("Total time " + timer.elapsed());
-    // writeln(a);
+    res(testType) = cnt;
+    times(testType) = timer.elapsed();
 }
+
 proc jobDoneByNormalOrder(x: [BD] real) {
         forall ij in innerDomain do {
             x(ij) = here.id;
@@ -159,9 +151,17 @@ proc init_array(x: [BD] real) {
 // Main routine.
 //
 proc main() {
-    write("");
-    // jobDoneByNormalOrder(a);
-    // jobDoneByRedBlackOrder(a);
+    var res:  [{0..2}] int = 0;
+    var times: [{0..2}] real = 0;
+    if (v != 0) {
+        jobDoneByNormalOrder(a);
+        jobDoneByRedBlackOrder(a);
+    }
+    writeln(" ");
     for i in 0..2 do
-        run_test(i);
+        run_test(times, res, i);
+    writeln("Mesh size: ", n, " x ", n, ", epsilon=", epsilon);
+    writeln("Jacobi,Gauss-Seidel,Red-Black");
+    writeln(res, "--steps");
+    writeln(times, "--times");
 }
