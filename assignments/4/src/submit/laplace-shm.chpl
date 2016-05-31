@@ -8,12 +8,20 @@
 //
 
 use Time;
-var timer: Timer;
+var timer, timer1, timerTotal: Timer;
 
 config const epsilon = 0.0001;	// convergence tolerance
-config const n = 8; 	        // mesh size (including boundary)
+config const n = 8, verbose = 0;
 const D = {0..n-1, 0..n-1};   // domain including boundary points
 const innerDomain = {1..(n-2), 1..(n-2)};
+
+
+
+const BDr1 = {1..n-2 by 2, 1..n-2 by 2};
+const BDr2 = {2..n-2 by 2, 2..n-2 by 2};
+const BDb1 = {1..n-2 by 2, 2..n-2 by 2};
+const BDb2 = {2..n-2 by 2, 1..n-2 by 2};
+
 
 // Jacobi iteration -- return the iteration count.
 // 
@@ -40,8 +48,9 @@ proc gauss(x: [D] real, epsilon: real) {
 
     do {	
         xnew = x;
-        forall ij in innerDomain do
+        forall ij in innerDomain do {
             x(ij) = (x(ij+(-1,0)) + x(ij+(0,-1)) + x(ij+(1,0)) + x(ij+(0,1))) / 4.0;
+        }
         const delta = max reduce abs(x[innerDomain] - xnew[innerDomain]);
         cnt+= 1;
     } while (delta > epsilon);
@@ -55,19 +64,19 @@ proc red_black(x: [D] real, epsilon: real) {
 
     do {	
         xnew = x;
-        forall ij in {1..n-2 by 2, 1..n-2 by 2} do {
+        forall ij in BDr1 do {
             x(ij) = (x(ij+(-1,0)) + x(ij+(0,-1)) + x(ij+(1,0)) + x(ij+(0,1))) / 4.0;
         }
 
-        forall ij in {2..n-2 by 2, 2..n-2 by 2} do {
+        forall ij in BDr2 do {
             x(ij) = (x(ij+(-1,0)) + x(ij+(0,-1)) + x(ij+(1,0)) + x(ij+(0,1))) / 4.0;
         }
 
-        forall ij in {1..n-2 by 2, 2..n-2 by 2} do {
+        forall ij in BDb1 do {
             x(ij) = (x(ij+(-1,0)) + x(ij+(0,-1)) + x(ij+(1,0)) + x(ij+(0,1))) / 4.0;
         }
 
-        forall ij in {2..n-2 by 2, 1..n-2 by 2} do {
+        forall ij in BDb2 do {
             x(ij) = (x(ij+(-1,0)) + x(ij+(0,-1)) + x(ij+(1,0)) + x(ij+(0,1))) / 4.0;
         }
         const delta = max reduce abs(x[innerDomain] - xnew[innerDomain]);
@@ -78,8 +87,7 @@ proc red_black(x: [D] real, epsilon: real) {
 }
 
 
-proc run_test(times:[{0..2}] real, res:[{0..2}] int, testType: int) {
-    var a: [D] real = 0.0;	// mesh array
+proc run_test(times:[{0..2}] real, res:[{0..2}] int, testType: int, a: [D] real) {
     var cnt: int = 0;
     init_array(D,a);
     timer.clear();
@@ -99,6 +107,37 @@ proc run_test(times:[{0..2}] real, res:[{0..2}] int, testType: int) {
     times(testType) = timer.elapsed();
 }
 
+proc jobDoneByNormalOrder(x: [D] real) {
+        forall ij in innerDomain do {
+            x(ij) = here.id;
+        }
+        writeln("Normal Order");
+        writeln(x);
+        writeln("");
+}
+
+proc jobDoneByRedBlackOrder(x: [D] real) {
+        forall ij in BDr1 do {
+            x(ij) = here.id;
+        }
+
+        forall ij in BDr2 do {
+            x(ij) = here.id;
+        }
+
+        forall ij in BDb1 do {
+            x(ij) = here.id;
+        }
+
+        forall ij in BDb2 do {
+            x(ij) = here.id;
+        }
+        writeln("Red Black Order");
+        writeln(x);
+        writeln("");
+        x=0.0;
+}
+
 proc init_array(D: domain(2), x: [D] real) {
     x = 0.0;
     x[n-1, 0..n-1] = 1.0;         // - setting boundary values
@@ -108,13 +147,18 @@ proc init_array(D: domain(2), x: [D] real) {
 // Main routine.
 //
 proc main() {
+    var a: [D] real = 0.0;	// mesh array
     var res:  [{0..2}] int = 0;
     var times: [{0..2}] real = 0;
+    if (verbose != 0) {
+        jobDoneByNormalOrder(a);
+        jobDoneByRedBlackOrder(a);
+    }
     writeln(" ");
     for i in 0..2 do
-        run_test(times, res, i);
+        run_test(times, res, i, a);
     writeln("Mesh size: ", n, " x ", n, ", epsilon=", epsilon);
-    writeln("Jacobi,Gauss-Seidel,Red-Black");
-    writeln(res, "--steps");
-    writeln(times, "--times");
+    writeln("Jacobi Gauss-Seidel Red-Black");
+    writeln(res, " -- convergence steps");
+    writeln(times, " -- total runtime");
 }

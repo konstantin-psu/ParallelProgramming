@@ -15,24 +15,16 @@ CURRENT=laplace-distr
 CC = gcc
 CHPL = chpl
 
-all:  jacobi laplace jacobi-shm0 jacobi-shm laplace-shm laplace-distr
+all:  laplace laplace-shm laplace-distr
 
 current: $(CURRENT)
 
 run: $(CURRENT)
 	./$(CURRENT) -nl $(RUN_ARGS)
 
-jacobi: jacobi.c
-	$(CC) -o jacobi jacobi.c -g -lm
 
 laplace: laplace.c
 	$(CC) -o laplace laplace.c -g -lm
-
-jacobi-shm0: jacobi-shm0.chpl
-	$(CHPL) -o jacobi-shm0 jacobi-shm0.chpl
-
-jacobi-shm: jacobi-shm.chpl
-	$(CHPL) -o jacobi-shm jacobi-shm.chpl
 
 laplace-shm: laplace-shm.chpl
 	$(CHPL) -o laplace-shm laplace-shm.chpl
@@ -41,4 +33,4 @@ laplace-distr: laplace-distr.chpl
 	$(CHPL) -o laplace-distr laplace-distr.chpl
 
 clean:
-	rm -f *_real jacobi laplace jacobi-shm0 jacobi-shm laplace-shm laplace-distr
+	rm -f *_real laplace laplace-shm laplace-distr
