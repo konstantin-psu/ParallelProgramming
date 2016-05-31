@@ -166,7 +166,7 @@ forall ij in BDb2 do { ... // const BDb2 = BD[2..n-2 by 2, 1..n-2 by 2];
 It can be done in two loops, however this way's advantage - there is no need to calculate
 correct row offset. \\
 
-\section{Language comparison}
+\section{Performance}
 
 Chapel aims to make writing of parallel applications easy, and provides many built in
 mechanisms for this purpose. I enjoyed developing in Chapel, however the main problem with
@@ -179,19 +179,22 @@ code - only correct mapping to the locales, however it was even slower than shar
 with number locales doubled performance is slowed down by x2. This was unexpected result and
 I researched other possible implementation provided by Cray. Evaluating of Distributed
 Jacobi by Cray on linuxlab showed generally the same pattern - significant performance
-issues. Such a significant slowdown can be explained by high cost of communication of border
-locales. I omitted distributed results for $nl > 2$, since they take too long to run.
+issues. Such a significant slowdown can be explained by high cost of communication between border
+locales, or by poor Implementation of PGAS features.
 
 In distributed version I verified locales affinity by creating functions with exactly the
 same semantics as Jacobi - Gauss methods, except instead of performing computation it records
 locale ID".
 
-\subsection{Performance analysis}
 
 Convergence of all implementations is almost identical with insignificant deviations $\pm
 \%1- 2$.
-Gauss-Seidel convergence rate (both versions), is around \%40 better than Jacobi's, this was
-expected since values propagate faster, when update happens in place.
+Gauss-Seidel convergence rate (both versions), is around \%40 better than Jacobi, this was
+expected since values propagate faster, when update happens in place. Gauss-Seidel and Red-Black
+have about the same convergence rate, with Red-Black faster by some constant. The biggest downside
+of Red-Black, - need of at least two scans of the array, which introduces potential bottleneck.
+Shared memory version of Gauss-Seidel is usually faster, by a constant despite having a git slower
+convergence rate.
 
 % Convergence
 % Jacobi,Gauss-Seidel,Red-Black
