@@ -10,17 +10,20 @@
 use Time;
 var timer, timer1, timerTotal: Timer;
 
+// Parameters
 config const epsilon = 0.0001;	// convergence tolerance
-config const n = 8, verbose = 0;
+config const n = 8, verbose = 0; // n - matrix dimension size, verbose - verbosity flag
 const D = {0..n-1, 0..n-1};   // domain including boundary points
 const innerDomain = {1..(n-2), 1..(n-2)};
 
 
 
-const BDr1 = {1..n-2 by 2, 1..n-2 by 2};
-const BDr2 = {2..n-2 by 2, 2..n-2 by 2};
-const BDb1 = {1..n-2 by 2, 2..n-2 by 2};
-const BDb2 = {2..n-2 by 2, 1..n-2 by 2};
+// Cell is red if i + j is even
+const BDr1 = {1..n-2 by 2, 1..n-2 by 2}; // Red 1 - odd column odd row
+const BDr2 = {2..n-2 by 2, 2..n-2 by 2}; // Red 2 - even column even row
+// Cell is black if i + j is odd
+const BDb1 = {1..n-2 by 2, 2..n-2 by 2}; // Black 1 - odd column even row
+const BDb2 = {2..n-2 by 2, 1..n-2 by 2}; // Black 2 - even column odd row
 
 
 // Jacobi iteration -- return the iteration count.
