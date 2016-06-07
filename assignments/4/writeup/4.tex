@@ -73,7 +73,7 @@
 
 
 \newcommand{\hmwkTitle}{Assignment \#4}
-\newcommand{\hmwkDueDate}{May 1st, 2016}
+\newcommand{\hmwkDueDate}{June 1st, 2016}
 \newcommand{\hmwkClass}{CS515 Parallel Programming}
 \newcommand{\hmwkClassTime}{Spring 2016}
 \newcommand{\hmwkClassInstructor}{Jingke Li}
@@ -176,25 +176,27 @@ faster than similar shared memory algorithm in Chapel. \\
 
 Distributed version written in Chapel required very little modifications to the original
 code - only correct mapping to the locales, however it was even slower than shared memory,
-with number locales doubled performance is slowed down by x2. This was unexpected result and
-I researched other possible implementation provided by Cray. Evaluating of Distributed
-Jacobi by Cray on linuxlab showed generally the same pattern - significant performance
-issues. Such a significant slowdown can be explained by high cost of communication between border
-locales, or by poor Implementation of PGAS features.
+with number locales doubled performance is slowed down by x2.
+Such a significant slowdown can be explained by high cost of communication between border
+locales, or by poor Implementation/Compilation of PGAS features.
 
 In distributed version I verified locales affinity by creating functions with exactly the
 same semantics as Jacobi - Gauss methods, except instead of performing computation it records
-locale ID".
+locale ID", and by adding print statement that outputs number of current locale and current matrix
+element locale. Printout can be enabled by setting verbose flag to $>0$.\\
 
+\pagebreak
 
 Convergence of all implementations is almost identical with insignificant deviations $\pm
 \%1- 2$.
 Gauss-Seidel convergence rate (both versions), is around \%40 better than Jacobi, this was
-expected since values propagate faster, when update happens in place. Gauss-Seidel and Red-Black
+expected since values propagate faster, when update happens ``in place''. Gauss-Seidel and Red-Black
 have about the same convergence rate, with Red-Black faster by some constant. The biggest downside
-of Red-Black, - need of at least two scans of the array, which introduces potential bottleneck.
-Shared memory version of Gauss-Seidel is usually faster, by a constant despite having a git slower
-convergence rate.
+of Red-Black, - need of at least two scans of the array, one for Red Cells and another for Black, 
+which requires additional synchronization, however there is no potential concurrent writes as in
+Normal order.
+Shared memory version of Gauss-Seidel is usually faster, by a constant despite having a slower
+convergence rate. \\
 
 % Convergence
 % Jacobi,Gauss-Seidel,Red-Black
@@ -204,8 +206,13 @@ convergence rate.
 % 360 , 357 , 347 , 64 % 360 , 374 , 361 , 128
 % 360 , 374 , 361 , 256
 
+\noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
 
- \begin{minipage}{0.52\textwidth}
+With rough convergence tolerance, changes quickly propagate through the matrix, hence larger
+dimension have the same number of convergence steps, and vice versa:
+\\
+
+\begin{minipage}{0.52\textwidth}
 \begin{tikzpicture}
 \begin{axis}[
 title={Convergence $\epsilon = 0.001$},
@@ -218,7 +225,6 @@ enlargelimits=false,
 scaled y ticks=false,
 legend style={legend pos=south east, font=\fontsize{4}{5}\selectfont},
 ]
-
 \addplot coordinates {
 (8       , 43    )
 (16      , 131   )
@@ -301,7 +307,9 @@ legend style={legend pos=south east, font=\fontsize{4}{5}\selectfont},
 \end{tikzpicture}
 \end{minipage}%
 
-
+\vspace{0.6cm}
+\noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
+Performance of shared memory vs sequential implementation (Chapel):
 
 \begin{tikzpicture}
 \begin{axis}[
@@ -405,6 +413,11 @@ legend style={at={(0.2,-0.30)},anchor=north,legend columns=1},
 \end{axis}
 \end{tikzpicture}
 
+\pagebreak
+
+Performance of shared version vs distributed (CHAPEL) with number of locales = 2 (gets worse with
+higher number of locales - not shown):\\
+
 \begin{tikzpicture}
 \begin{axis}[
 title={Chapel Shared Memory vs Distr  $nl =2\ ,\epsilon = 0.001$},
@@ -473,6 +486,5 @@ legend style={at={(0.5,-0.20)},anchor=north,legend columns=1},
 
 \end{axis}
 \end{tikzpicture}
-
 
 \end{document}
